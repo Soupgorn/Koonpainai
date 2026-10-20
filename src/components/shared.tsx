@@ -1,5 +1,5 @@
 "use client";
-import { CalendarDays, FlaskConical, MapPin } from "lucide-react";
+import { FlaskConical, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 import type { AvailabilityKind, Friend } from "@/lib/types";
 import { statusLabel } from "@/lib/schedule";
@@ -61,21 +61,18 @@ export function DateDisplay() {
   const { now } = useClock();
   return (
     <div className="date-display">
-      <CalendarDays size={17} />
       <div>
         <strong>
           {now
             ? new Intl.DateTimeFormat("en-GB", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
                 hour: "2-digit",
                 minute: "2-digit",
                 timeZone: "Asia/Bangkok",
               }).format(now)
-            : "Today in Bangkok"}
+            : "--:--"}
+          <span className="clock-label">Bangkok</span>
         </strong>
-        <span>Bangkok time. Timetables, not live locations.</span>
+        <span>{now ? new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year:"numeric", timeZone:"Asia/Bangkok" }).format(now) : "Today in Bangkok"}</span>
       </div>
     </div>
   );

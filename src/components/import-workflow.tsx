@@ -42,7 +42,7 @@ const STAGES: Record<ProcessingProgress["stage"], string> = {
   recognizing: "Reading Thai and English text",
   parsing: "Reconstructing course rows and sessions",
 };
-export function ImportWorkflow() {
+export function ImportWorkflow({ personal = false, onUsePreview }: { personal?: boolean; onUsePreview?: (friend: Friend) => void } = {}) {
   const [step, setStep] = useState(0);
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState<string | null>(null);
@@ -59,6 +59,7 @@ export function ImportWorkflow() {
   const [sourcePage, setSourcePage] = useState(1);
   const [preview, setPreview] = useState<"week" | "profile">("week");
   const [notice, setNotice] = useState("");
+  const [mobilePanel, setMobilePanel] = useState<"review" | "source">("review");
   const picker = useRef<HTMLInputElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
   const activeUrl = useRef<string | null>(null);
@@ -237,13 +238,14 @@ export function ImportWorkflow() {
   }
   function showSource(page: number) {
     setSourcePage(page);
+    setMobilePanel("source");
     if (window.innerWidth <= 900)
-      document.getElementById("pdf-source")?.scrollIntoView({
+      requestAnimationFrame(() => document.getElementById("pdf-source")?.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "instant"
           : "smooth",
         block: "start",
-      });
+      }));
   }
   function accept() {
     if (!confirmed || !schema.success) {
@@ -286,13 +288,13 @@ export function ImportWorkflow() {
   }
   return (
     <main id="main" className="main-container import-page">
-      <Link className="back-link" href="/admin">
+      <Link className="back-link" href={personal ? "/my-timetable" : "/admin"}>
         <ArrowLeft size={15} />
-        Manage timetables
+        {personal ? "My Timetable" : "Manage timetables"}
       </Link>
       <div className="import-heading">
         <h1 ref={title} tabIndex={-1}>
-          A timetable, made useful.
+          Bring your week along.
         </h1>
         <p>Read your PDF. Check the details. Make room for plans.</p>
       </div>
@@ -547,7 +549,11 @@ export function ImportWorkflow() {
               </ul>
             </details>
           ) : null}
-          <div className="review-layout">
+          <div className="mobile-review-tabs" role="group" aria-label="Import review panels">
+            <button aria-pressed={mobilePanel === "review"} onClick={() => setMobilePanel("review")}>Review classes ({sessions.length})</button>
+            <button aria-pressed={mobilePanel === "source"} onClick={() => setMobilePanel("source")}>Original PDF</button>
+          </div>
+          <div className="review-layout" data-mobile-panel={mobilePanel}>
             <aside className="source-panel" id="pdf-source" tabIndex={-1}>
               <div className="source-panel-heading">
                 <FileText size={16} />
@@ -691,6 +697,7 @@ export function ImportWorkflow() {
               Download schedule JSON
             </Button>
           </div>
+          {onUsePreview && <div className="personal-import-action"><Button onClick={() => { onUsePreview(previewFriend); setNotice("Timetable added to your temporary personal preview. It is not saved or shared and resets on reload."); }}>Use in my temporary preview</Button><Link className="text-link" href="/my-timetable">View My Timetable <ArrowRight size={15}/></Link></div>}
           <p className="export-notice" role="status">
             {notice}
           </p>

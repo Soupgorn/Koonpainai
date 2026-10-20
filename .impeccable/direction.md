@@ -1,23 +1,23 @@
-# Friends directory and timetable
+# Approved Koonpinai implementation
 
-Mode: Operate. Scope: /, /friends/[id], /admin, /admin/import.
-
-## Design plan
-Palette: ink #202321, white #FFFFFF, canvas #F8F9F7, line #E5E7E2, free #23714E, class #946119. Noto Sans Thai Variable throughout for equally considered English and Thai. Left-aligned content with a wide introductory heading; compact data typography and tabular numerals.
-
-Desktop: [wordmark | Friends / Admin | Bangkok clock] / [heading + short copy | date] / [search | status filters | view toggle] / [three-column friend directory]. Mobile: compact header / heading / full-width search / scroll-safe filters / single-column directory; profile changes to a day agenda.
-
-Review against brief: remove dashboard statistic cards and a decorative map; use useful inline counts and actual classroom information. Keep the monochrome system explicitly requested by the user. A timetable ribbon on each friend shows today's actual class intervals, connecting the directory to the product's mechanism.
+Mode: Operate for the authenticated product screens; Persuade for the login entry.
 
 ## Direction contract
-THESIS: A place to find a break together, with timetable-based availability as the first thing friends read.
 
-OWN-WORLD: White canvas, ink typography, soft gray borders, precise 12px directory corners; Noto Sans Thai and subdued state badges. Restrained semantic green and amber communicate schedule states.
+THESIS: Find a break together. Availability and the length of a free window lead the directory; the schedule supplies the detail.
 
-STORY: Read Bangkok time, search or filter friends, then open a profile to see the week. Friend management is a clearly labeled session-only demo. PDF import actually processes selected documents locally, supports source review and correction, then previews and exports validated JSON without public publishing.
+REFERENCE: The user selected Contemporary Social Utility (Concept C), exported under `D:/Project/Koonpinai-design-previews/design-previews/selected/`. The exact standalone prototype in that sibling directory is the code-led composition reference. No new concept tournament or visual direction is introduced. References include dashboard, friend-profile, my-timetable, login, onboarding, policy, approval, and PDF upload/progress/review desktop/mobile PNGs.
 
-FIRST VIEWPORT: A 76px navigation row; a generous left-aligned headline with clock/date opposite; compact inline counts; a single search and filter toolbar; three readable friend columns. Signature interaction: an optional explicit time preview updates the directory, today's miniature timetable strips, profile status and ongoing timetable classes together. No entrance choreography.
+OWN-WORLD: Manrope with Noto Sans Thai, near-white canvas, white flat surfaces, periwinkle accent, navy ink, rounded-square initials, restrained green availability and amber class states. Dark Mode translates this to blue-charcoal canvas, elevated navy surfaces, off-white ink and soft periwinkle. Semantic course identities remain stable in both themes.
 
-FORM: User-pinned monochrome premium product direction takes precedence over the concept roll. Code-led Operate surface. seed: none (brief-pinned direction).
+FIRST VIEWPORT: Geometric K wordmark, Friends/My Timetable navigation, visible theme control and account preview. Heading and Bangkok clock, personal next-class strip where previews are enabled, explicit fictional-clock disclosure, nickname search, filters, two-column free-person rows, then a compact in-class roster. Mobile uses one-column free rows, current course/room/next-class roster lines and fixed bottom navigation.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+FORM: Faithful port of the approved code-led prototype; React interactions use existing typed data and scheduling logic. Twelve existing fictional people are preserved rather than replacing them with the eight illustrative mockup records. Exact schedule positions, overlaps, academic terms, parsing, OCR and JSON schema remain the existing implementation's responsibility. Administrative screens extend the same visual vocabulary.
+
+INTERACTIONS: Light/Dark/System via next-themes; operating-system default, local preference persistence, pre-hydration theme script, accessible header toggle and radio choices. Native forms and Radix dialogs retain keyboard behavior. Mobile import switches between source and review; desktop shows both.
+
+TRUTH: Real PDF extraction remains real. SSO, accounts, approval and server writes are not connected; previews are labeled and disabled by default in production. Personal profile/timetable and access status edits live only in memory. Only visual theme preference is stored locally. Original document colors remain accurate.
+
+QUALITY BAR: Match the reference composition, type, gutters, hierarchy and flat surface treatment. Preserve first-viewport free-person scanability; expose next-class names on mobile. Normal text >=4.5:1, large text >=3:1, discernible inputs/focus and 44px theme targets. Inspect both themes at 1440 and 390, plus overflow at 320/768/1024. No generic metrics dashboard, heavy shadows, gradients, neon accents or new social/group mechanisms.
+
+FINISH: Two visual review rounds, fresh finish reviewer, real extraction regression tests, theme tests, production build, screenshot gallery, token-bearing DESIGN.md and refreshed sidecar. No commit, push or deployment.

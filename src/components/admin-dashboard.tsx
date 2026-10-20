@@ -110,6 +110,7 @@ export function AdminDashboard({
         </Button>
       </div>
       <DemoNotice />
+      <nav className="admin-subnav" aria-label="Administration"><Link href="/admin" aria-current="page">Timetables</Link><Link href="/admin/access">Access management</Link></nav>
       <section className="admin-overview" aria-label="Schedule overview">
         <div>
           <Users size={18} />

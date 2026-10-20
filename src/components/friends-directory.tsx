@@ -2,25 +2,21 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowUpRight,
-  BookOpen,
+  ArrowRight,
+  CalendarDays,
+  ChevronRight,
   Clock3,
   LayoutGrid,
   List,
   Search,
   SearchX,
-  SlidersHorizontal,
   X,
 } from "lucide-react";
-import type { Friend } from "@/lib/types";
-import {
-  daySessions,
-  getAvailability,
-  localParts,
-  minutes,
-  nextLabel,
-} from "@/lib/schedule";
+import type { Availability, Friend } from "@/lib/types";
+import { getAvailability, localParts, nextLabel } from "@/lib/schedule";
+import { fixtureLabel } from "@/lib/display";
 import { useClock } from "./clock-provider";
+import { usePersonalPreview } from "./personal-preview-provider";
 import {
   Avatar,
   DateDisplay,
@@ -31,126 +27,102 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
-function DayRibbon({ friend, now }: { friend: Friend; now: Date }) {
-  const local = localParts(now);
-  const availability = getAvailability(friend, now);
-  if (
-    availability.kind === "out-of-term" ||
-    availability.kind === "no-schedule"
-  )
-    return null;
-  const sessions = daySessions(friend, local.day);
-  const currentIds = new Set(availability.current.map((session) => session.id));
+type Entry = { friend: Friend; status: Availability };
+function FreePerson({ friend, status, now }: Entry & { now: Date }) {
+  const sameDay = status.next?.date === localParts(now).date;
+  const remaining = status.next
+    ? Math.max(0, Math.ceil((status.next.startsAt - now.getTime()) / 60_000))
+    : 0;
+  const duration = sameDay
+    ? `${Math.floor(remaining / 60) ? `${Math.floor(remaining / 60)}h ` : ""}${remaining % 60 ? `${remaining % 60}m` : ""}`.trim()
+    : "Rest of today";
   return (
-    <div className="day-ribbon" aria-hidden="true">
-      <span>08</span>
-      <div className="ribbon-track">
-        {sessions.map((s) => (
-          <i
-            key={s.id}
-            className={currentIds.has(s.id) ? "ribbon-ongoing" : ""}
-            style={{
-              left: `${Math.max(0, ((minutes(s.start) - 480) / 600) * 100)}%`,
-              width: `${((minutes(s.end) - minutes(s.start)) / 600) * 100}%`,
-            }}
-          />
-        ))}
-        {local.minute >= 480 && local.minute <= 1080 && (
-          <b style={{ left: `${((local.minute - 480) / 600) * 100}%` }} />
-        )}
+    <Link href={`/friends/${friend.id}`} className="friend-card free-person">
+      <Avatar friend={friend} />
+      <div className="person-name">
+        <strong>
+          {friend.nickname}
+          <span lang="th">{friend.thaiName}</span>
+        </strong>
+        <span>
+          {sameDay
+            ? `Free until ${status.next!.session.start}`
+            : "No more classes today"}
+        </span>
       </div>
-      <span>18</span>
-    </div>
-  );
-}
-function FriendCard({ friend, now }: { friend: Friend; now: Date }) {
-  const status = getAvailability(friend, now);
-  const current = status.current[0];
-  return (
-    <Link href={`/friends/${friend.id}`} className="friend-card">
-      <div className="friend-card-top">
-        <Avatar friend={friend} />
-        <div className="friend-name">
-          <h2>
-            {friend.nickname}
-            <span lang="th">{friend.thaiName}</span>
-          </h2>
-          <span>{friend.department}</span>
-        </div>
-        <ArrowUpRight className="card-arrow" size={17} />
-      </div>
-      <div className="friend-card-body">
+      <div className="window">
+        <strong>{duration}</strong>
         <StatusBadge kind={status.kind} />
-        {current ? (
-          <>
-            <h3>
-              {current.name}
-              {status.current.length > 1 && (
-                <small> +{status.current.length - 1} overlapping</small>
-              )}
-            </h3>
-            <div className="card-meta">
-              <Room>{current.room}</Room>
-              <span>
-                <Clock3 size={13} />
-                Until {current.end}
-              </span>
-            </div>
-          </>
-        ) : (
-          <>
-            <h3 className="available-copy">
-              {status.kind === "no-schedule"
-                ? "Their week is still a mystery."
-                : status.kind === "out-of-term"
-                  ? "Between semesters."
-                  : status.kind === "upcoming"
-                    ? "Time for a quick catch-up."
-                    : "A good time to say hello."}
-            </h3>
-            <div className="card-meta">
-              <Clock3 size={13} />
-              <span>
-                {status.kind === "no-schedule"
-                  ? "No timetable added yet"
-                  : status.kind === "out-of-term"
-                    ? "Outside the academic date range"
-                    : status.next?.date === localParts(now).date
-                      ? `Free until ${status.next.session.start}`
-                      : "No more classes today"}
-              </span>
-            </div>
-          </>
-        )}
       </div>
-      <div className="friend-card-bottom">
-        {current && status.freeAt !== current.end ? (
-          <span>
-            <BookOpen size={13} />
-            Next break at {status.freeAt}
-          </span>
-        ) : status.next ? (
-          <span className="next-class">
-            <span>Next</span>
-            <span>{status.next.session.name}</span>
-            {(!!current || status.next.date !== localParts(now).date) && (
-              <time>{nextLabel(status.next, now)}</time>
-            )}
-          </span>
-        ) : (
-          <span>No upcoming classes this semester</span>
-        )}
-        <DayRibbon friend={friend} now={now} />
-      </div>
+      <ChevronRight size={17} />
     </Link>
   );
 }
-export function FriendsDirectory({ friends }: { friends: Friend[] }) {
+function ClassRow({ friend, status, now }: Entry & { now: Date }) {
+  const current = status.current[0];
+  return (
+    <Link href={`/friends/${friend.id}`} className="friend-card class-row">
+      <div className="identity">
+        <Avatar friend={friend} />
+        <div>
+          <strong>
+            {friend.nickname}
+            <span lang="th">{friend.thaiName}</span>
+          </strong>
+          <span className="mobile-status">
+            {current
+              ? `In class until ${status.freeAt}`
+              : status.kind === "no-schedule"
+                ? "No schedule"
+                : "Outside semester"}
+          </span>
+        </div>
+      </div>
+      <div className="row-course">
+        <strong>
+          {current
+            ? fixtureLabel(current.name)
+            : status.kind === "no-schedule"
+              ? "No timetable added yet"
+              : "Between semesters"}
+          {status.current.length > 1 && (
+            <small> +{status.current.length - 1} overlapping</small>
+          )}
+        </strong>
+        {current && <Room>{fixtureLabel(current.room)}</Room>}
+      </div>
+      <span className="row-status">
+        <StatusBadge kind={status.kind} />
+        {current && <small>Until {status.freeAt}</small>}
+      </span>
+      <span className="row-next">
+        <strong>
+          {status.next && <span className="mobile-next-label">Next </span>}
+          {status.next
+            ? status.next.date === localParts(now).date
+              ? status.next.session.start
+              : nextLabel(status.next, now)
+            : "No upcoming classes"}
+        </strong>
+        {status.next && <small>{fixtureLabel(status.next.session.name)}</small>}
+      </span>
+      <ChevronRight size={17} />
+    </Link>
+  );
+}
+export function FriendsDirectory({
+  friends,
+  showPersonal = false,
+}: {
+  friends: Friend[];
+  showPersonal?: boolean;
+}) {
   const { now } = useClock();
+  const { timetable } = usePersonalPreview();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const statuses = useMemo(
+  const entries = useMemo(
     () =>
       now
         ? friends.map((friend) => ({
@@ -160,69 +132,88 @@ export function FriendsDirectory({ friends }: { friends: Friend[] }) {
         : [],
     [friends, now],
   );
-  const inClass = statuses.filter((s) => s.status.kind === "in-class").length;
-  const free = statuses.filter((s) =>
-    ["free", "upcoming"].includes(s.status.kind),
-  ).length;
-  const shown = statuses.filter(
-    ({ friend, status }) =>
+  const isFree = (entry: Entry) =>
+    entry.status.kind === "free" || entry.status.kind === "upcoming";
+  const free = entries.filter(isFree).length;
+  const inClass = entries.filter((e) => e.status.kind === "in-class").length;
+  const shown = entries.filter(
+    (entry) =>
       (filter === "all" ||
-        (filter === "class" && status.kind === "in-class") ||
-        (filter === "free" && ["free", "upcoming"].includes(status.kind))) &&
-      `${friend.nickname} ${friend.thaiName}`
+        (filter === "free"
+          ? isFree(entry)
+          : entry.status.kind === "in-class")) &&
+      `${entry.friend.nickname} ${entry.friend.thaiName}`
         .toLocaleLowerCase()
         .includes(query.trim().toLocaleLowerCase()),
   );
+  const available = shown.filter(isFree);
+  const studying = shown.filter((e) => e.status.kind === "in-class");
+  const other = shown.filter((e) =>
+    ["no-schedule", "out-of-term"].includes(e.status.kind),
+  );
+  const personal = now ? getAvailability(timetable, now) : null;
   return (
-    <main id="main" className="main-container">
-      <section className="directory-intro">
+    <main id="main" className="main-container dashboard">
+      <section className="page-heading">
         <div>
-          <h1>Where’s everyone?</h1>
-          <p>Find your people. Catch a break together.</p>
-          <div className="overview">
-            <span>
-              <UsersIcon />
-              {friends.length} friends
-            </span>
-            <span>
-              <i className="tiny-dot amber" />
-              {now ? inClass : "–"} in class
-            </span>
-            <span>
-              <i className="tiny-dot green" />
-              {now ? free : "–"} free now
-            </span>
-          </div>
+          <h1>Find a break together.</h1>
+          <p>From weekly timetables. Plans may differ.</p>
         </div>
         <DateDisplay />
       </section>
+      {showPersonal && personal?.next && (
+        <aside className="own-strip">
+          <CalendarDays className="own-icon" size={24} />
+          <div>
+            <span className="small-label">Your next class · preview</span>
+            <strong>{fixtureLabel(personal.next.session.name)}</strong>
+          </div>
+          <div className="own-time">
+            <strong>
+              {personal.next.session.start}–{personal.next.session.end}
+            </strong>
+            <span>
+              {fixtureLabel(personal.next.session.room)} ·{" "}
+              {personal.next.date === localParts(now!).date
+                ? "Today"
+                : nextLabel(personal.next, now!).split(",")[0]}
+            </span>
+          </div>
+          <Link href="/my-timetable" aria-label="View My Timetable">
+            My Timetable <ArrowRight size={18} />
+          </Link>
+        </aside>
+      )}
       <PreviewControl />
       <section aria-label="Friends directory">
-        <div className="directory-toolbar">
-          <div className="search-field">
-            <Search size={17} />
+        <div className="toolbar">
+          <div className="search">
+            <Search size={19} />
             <Input
               aria-label="Search friends by nickname"
-              placeholder="Find a friend…"
+              placeholder="Find someone by nickname"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
             {query && (
-              <button onClick={() => setQuery("")} aria-label="Clear search">
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+              >
                 <X size={16} />
               </button>
             )}
-            <span className="search-hint">{friends.length} friends</span>
           </div>
           <div
-            className="filter-tabs"
+            className="filters"
             role="group"
             aria-label="Filter by availability"
           >
             {[
               ["all", "Everyone", friends.length],
-              ["class", "In class", inClass],
               ["free", "Free now", free],
+              ["class", "In class", inClass],
             ].map(([value, label, count]) => (
               <button
                 key={value}
@@ -255,19 +246,13 @@ export function FriendsDirectory({ friends }: { friends: Friend[] }) {
             </button>
           </div>
         </div>
-        <div className="directory-caption">
-          <span aria-live="polite">
-            {query || filter !== "all"
-              ? `${shown.length} ${shown.length === 1 ? "friend" : "friends"} found`
-              : "A familiar face is always close by."}
-          </span>
-          <span>
-            <span className="tiny-dot green" />
-            Updates with the timetable
-          </span>
-        </div>
+        {(query || filter !== "all") && (
+          <p className="directory-caption" role="status">
+            {shown.length} {shown.length === 1 ? "friend" : "friends"} found
+          </p>
+        )}
         {!now ? (
-          <div className="friend-grid">
+          <div className="friend-grid" aria-label="Loading availability">
             {Array.from({ length: 6 }, (_, i) => (
               <div className="friend-skeleton" key={i}>
                 <div />
@@ -276,17 +261,9 @@ export function FriendsDirectory({ friends }: { friends: Friend[] }) {
               </div>
             ))}
           </div>
-        ) : shown.length ? (
-          <div
-            className={`friend-grid ${view === "list" ? "friend-list" : ""}`}
-          >
-            {shown.map(({ friend }) => (
-              <FriendCard key={friend.id} friend={friend} now={now} />
-            ))}
-          </div>
-        ) : (
+        ) : !shown.length ? (
           <div className="empty-state">
-            <SearchX size={32} strokeWidth={1.4} />
+            <SearchX size={32} />
             <h2>
               {query
                 ? `No friends matching “${query}”`
@@ -294,11 +271,7 @@ export function FriendsDirectory({ friends }: { friends: Friend[] }) {
                   ? "Everyone’s out of class."
                   : "No one’s free just now."}
             </h2>
-            <p>
-              {query
-                ? "Try another nickname, in English or Thai."
-                : "Try everyone to see what the rest of the week looks like."}
-            </p>
+            <p>Try another nickname in English or Thai, or show everyone.</p>
             <Button
               variant="outline"
               onClick={() => {
@@ -306,40 +279,81 @@ export function FriendsDirectory({ friends }: { friends: Friend[] }) {
                 setFilter("all");
               }}
             >
-              <SlidersHorizontal size={15} />
               Show everyone
             </Button>
+          </div>
+        ) : (
+          <div className={view === "list" ? "friend-list" : "directory-groups"}>
+            {available.length > 0 && (
+              <section aria-labelledby="free-heading">
+                <div className="section-title">
+                  <h2 id="free-heading">
+                    Free now <span>{available.length} friends</span>
+                  </h2>
+                  <span className="subtle">
+                    Make the most of the time between classes.
+                  </span>
+                </div>
+                <div className="free-people">
+                  {available.map((e) => (
+                    <FreePerson key={e.friend.id} {...e} now={now} />
+                  ))}
+                </div>
+              </section>
+            )}
+            {studying.length > 0 && (
+              <section
+                className="class-section"
+                aria-labelledby="class-heading"
+              >
+                <div className="section-title">
+                  <h2 id="class-heading">
+                    In class <span>{studying.length} friends</span>
+                  </h2>
+                  <span className="subtle">
+                    From scheduled classes, not attendance.
+                  </span>
+                </div>
+                <div className="roster-head" aria-hidden="true">
+                  <span>Friend</span>
+                  <span>Current class</span>
+                  <span>Availability</span>
+                  <span>Next class</span>
+                  <span />
+                </div>
+                <div className="class-roster">
+                  {studying.map((e) => (
+                    <ClassRow key={e.friend.id} {...e} now={now} />
+                  ))}
+                </div>
+              </section>
+            )}
+            {other.length > 0 && (
+              <section
+                className="class-section"
+                aria-labelledby="other-heading"
+              >
+                <div className="section-title">
+                  <h2 id="other-heading">
+                    No current schedule <span>{other.length} friends</span>
+                  </h2>
+                </div>
+                <div className="class-roster">
+                  {other.map((e) => (
+                    <ClassRow key={e.friend.id} {...e} now={now} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </section>
       <aside className="schedule-note">
-        <span className="note-icon">
-          <BookOpen size={18} strokeWidth={1.6} />
+        <Clock3 size={16} />
+        <span>
+          Timetable-based availability. Not live location or attendance.
         </span>
-        <div>
-          <h2>A schedule, not a location.</h2>
-          <p>
-            Availability is based on class timetables. Your friends might be
-            grabbing coffee somewhere else.
-          </p>
-        </div>
       </aside>
     </main>
-  );
-}
-function UsersIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      aria-hidden="true"
-    >
-      <circle cx="9" cy="8" r="3" />
-      <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-3-5" />
-    </svg>
   );
 }

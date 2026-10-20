@@ -1,75 +1,145 @@
 ---
 name: Koonpinai
-description: A quiet, bilingual timetable interface for finding time together.
+description: The approved Contemporary Social Utility interface for finding a break together.
 colors:
-  background: "#ffffff"
-  foreground: "#202321"
-  surface: "#f8f9f7"
-  surface-hover: "#f1f3ef"
-  border: "#e5e7e2"
-  muted: "#687064"
-  free: "#23714e"
+  background: "#f7f8fb"
+  foreground: "#24263c"
+  card: "#ffffff"
+  surface: "#ededfc"
+  surface-hover: "#f0f0fa"
+  primary: "#5657c8"
+  primary-hover: "#4545ad"
+  primary-foreground: "#ffffff"
+  border: "#dfe2eb"
+  border-hover: "#a5a6d9"
+  input-border: "#8b93a8"
+  muted: "#62677b"
+  focus: "#5657c8"
+  free: "#206443"
   free-bg: "#edf6ef"
-  class: "#946119"
-  class-bg: "#fcf4e5"
+  class: "#885a17"
+  class-bg: "#faf2e4"
   danger: "#a93832"
-  primary-hover: "#3f453e"
-  destructive-hover: "#8a2b26"
-  focus: "#526653"
-  input-border: "#daddd5"
-  input-focus: "#6e826d"
-  ghost-text: "#555e52"
-  status-neutral: "#f0f1ee"
-  status-neutral-text: "#656d5e"
+  danger-hover: "#8a2b26"
+  danger-bg: "#fbf0ef"
+  warning-border: "#a97121"
+  warning-surface: "#fff9ee"
+  class-marker: "#a36c1b"
+  status-neutral: "#eceef4"
+  ribbon-session: "#c6c7e6"
+  ribbon-ongoing: "#ba8d42"
+  overlay: "#11182788"
+  selection: "#d8daf8"
+  today: "#f5f5fe"
+  avatar-0-bg: "#ececfc"
+  avatar-0-fg: "#4d4fb2"
+  avatar-1-bg: "#f7ece6"
+  avatar-1-fg: "#95513b"
+  avatar-2-bg: "#e8f1f1"
+  avatar-2-fg: "#38676b"
+  avatar-3-bg: "#f6efda"
+  avatar-3-fg: "#806128"
+  course-0-bg: "#ebf0ed"
+  course-0-text: "#3d5b48"
+  course-1-bg: "#faf1dd"
+  course-1-text: "#70501d"
+  course-2-bg: "#ebedf9"
+  course-2-text: "#4e5186"
+  course-3-bg: "#f3ebf0"
+  course-3-text: "#775269"
+  course-4-bg: "#e8eff5"
+  course-4-text: "#3f6277"
+  course-5-bg: "#f4ece6"
+  course-5-text: "#7c5740"
+  dark-background: "#101725"
+  dark-foreground: "#edf0fa"
+  dark-card: "#182132"
+  dark-surface: "#252b47"
+  dark-surface-hover: "#232e43"
+  dark-primary: "#b3b3ff"
+  dark-primary-hover: "#c9c9ff"
+  dark-primary-foreground: "#171a2d"
+  dark-border: "#354259"
+  dark-border-hover: "#7783b3"
+  dark-input-border: "#7886a0"
+  dark-muted: "#adb9d0"
+  dark-focus: "#b3b3ff"
+  dark-free: "#a5d7b2"
+  dark-free-bg: "#19392e"
+  dark-class: "#eac57f"
+  dark-class-bg: "#3b3020"
+  dark-danger: "#ffb7b0"
+  dark-danger-hover: "#ffd4cf"
+  dark-danger-bg: "#43292f"
+  dark-warning-border: "#bc934d"
+  dark-warning-surface: "#302a21"
+  dark-class-marker: "#eac57f"
+  dark-status-neutral: "#28364d"
+  dark-ribbon-session: "#6675a1"
+  dark-ribbon-ongoing: "#d6b679"
+  dark-overlay: "#050910bb"
+  dark-selection: "#454573"
+  dark-today: "#1e2940"
+  dark-avatar-0-bg: "#303354"
+  dark-avatar-0-fg: "#c0c0ff"
+  dark-avatar-1-bg: "#42332f"
+  dark-avatar-1-fg: "#ecc1a9"
+  dark-avatar-2-bg: "#223d42"
+  dark-avatar-2-fg: "#a7d9d5"
+  dark-avatar-3-bg: "#403c2a"
+  dark-avatar-3-fg: "#e6d198"
+  dark-course-0-bg: "#253d32"
+  dark-course-0-text: "#c0dec9"
+  dark-course-1-bg: "#443820"
+  dark-course-1-text: "#f2d695"
+  dark-course-2-bg: "#303455"
+  dark-course-2-text: "#d1d2ff"
+  dark-course-3-bg: "#423043"
+  dark-course-3-text: "#e7bfda"
+  dark-course-4-bg: "#233d50"
+  dark-course-4-text: "#b9dbea"
+  dark-course-5-bg: "#44352e"
+  dark-course-5-text: "#eccab0"
 typography:
   display:
-    fontFamily: '"Noto Sans Thai Variable", "Noto Sans Thai", sans-serif'
-    fontSize: "48px"
-    fontWeight: 600
-    lineHeight: 1.2
+    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontSize: "58px"
+    fontWeight: 700
+    lineHeight: 1.12
     letterSpacing: "-0.035em"
   headline:
-    fontFamily: '"Noto Sans Thai Variable", "Noto Sans Thai", sans-serif'
-    fontSize: "44px"
-    fontWeight: 600
-    lineHeight: 1.2
+    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontSize: "43px"
+    fontWeight: 700
+    lineHeight: 1.18
     letterSpacing: "-0.035em"
   title:
-    fontFamily: '"Noto Sans Thai Variable", "Noto Sans Thai", sans-serif'
-    fontSize: "21px"
-    fontWeight: 600
-    lineHeight: 1.4
-    letterSpacing: "-0.025em"
-  subheading:
-    fontFamily: '"Noto Sans Thai Variable", "Noto Sans Thai", sans-serif'
-    fontSize: "16px"
-    fontWeight: 600
-    lineHeight: 1.5
-    letterSpacing: "-0.015em"
+    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontSize: "22px"
+    fontWeight: 700
+    lineHeight: 1.35
+    letterSpacing: "-0.02em"
   body:
-    fontFamily: '"Noto Sans Thai Variable", "Noto Sans Thai", sans-serif'
+    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
     fontSize: "14px"
     lineHeight: 1.6
   label:
-    fontFamily: '"Noto Sans Thai Variable", "Noto Sans Thai", sans-serif'
+    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
     fontSize: "13px"
-    fontWeight: 500
+    fontWeight: 650
     lineHeight: 1.5
   status:
-    fontFamily: '"Noto Sans Thai Variable", "Noto Sans Thai", sans-serif'
-    fontSize: "10px"
-    fontWeight: 500
+    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontSize: "11px"
+    fontWeight: 650
     lineHeight: 1.5
 rounded:
-  badge: "4px"
-  segment: "5px"
-  nav: "6px"
-  input: "7px"
+  badge: "5px"
+  field: "7px"
   control: "8px"
-  timetable: "10px"
-  card: "12px"
-  dialog: "14px"
-  avatar: "50%"
+  container: "12px"
+  avatar: "16px"
+  profile-avatar: "26px"
 spacing:
   xs: "4px"
   sm: "8px"
@@ -78,201 +148,205 @@ spacing:
   xl: "20px"
   xxl: "24px"
   panel: "32px"
-  desktop-gutter: "40px"
+  desktop-gutter: "44px"
 components:
   button-primary:
-    backgroundColor: "{colors.foreground}"
-    textColor: "{colors.background}"
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.primary-foreground}"
     typography: "{typography.label}"
     rounded: "{rounded.control}"
     padding: "9px 16px"
+    height: "44px"
   button-primary-hover:
     backgroundColor: "{colors.primary-hover}"
   button-outline:
-    backgroundColor: "{colors.background}"
-    textColor: "{colors.foreground}"
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.primary}"
     rounded: "{rounded.control}"
     padding: "9px 16px"
+    height: "44px"
   button-ghost:
     backgroundColor: "transparent"
-    textColor: "{colors.ghost-text}"
+    textColor: "{colors.primary}"
     rounded: "{rounded.control}"
     padding: "9px 16px"
+    height: "44px"
   button-destructive:
-    backgroundColor: "{colors.danger}"
-    textColor: "{colors.background}"
+    backgroundColor: "{colors.danger-bg}"
+    textColor: "{colors.danger}"
     rounded: "{rounded.control}"
     padding: "9px 16px"
+    height: "44px"
+  button-destructive-hover:
+    backgroundColor: "{colors.danger-bg}"
+    textColor: "{colors.danger-hover}"
   input:
-    backgroundColor: "{colors.background}"
+    backgroundColor: "{colors.card}"
     textColor: "{colors.foreground}"
-    rounded: "{rounded.input}"
+    rounded: "{rounded.control}"
     padding: "9px 12px"
+    height: "45px"
   navigation:
-    textColor: "{colors.muted}"
-    rounded: "{rounded.nav}"
-    padding: "8px 12px"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.primary}"
+    rounded: "{rounded.control}"
+    padding: "12px 16px"
   status-free:
     backgroundColor: "{colors.free-bg}"
     textColor: "{colors.free}"
     typography: "{typography.status}"
     rounded: "{rounded.badge}"
-    padding: "3px 7px"
+    padding: "4px 8px"
   status-class:
     backgroundColor: "{colors.class-bg}"
     textColor: "{colors.class}"
     typography: "{typography.status}"
     rounded: "{rounded.badge}"
-    padding: "3px 7px"
-  friend-card:
-    backgroundColor: "{colors.background}"
+    padding: "4px 8px"
+  directory-container:
+    backgroundColor: "{colors.card}"
     textColor: "{colors.foreground}"
-    rounded: "{rounded.card}"
-    padding: "22px 22px 15px"
-  filter-tabs:
-    backgroundColor: "{colors.surface}"
-    rounded: "{rounded.control}"
-    padding: "4px"
+    rounded: "{rounded.container}"
+  free-window-row:
+    textColor: "{colors.foreground}"
+    padding: "23px"
+  course-block:
+    backgroundColor: "{colors.course-0-bg}"
+    textColor: "{colors.course-0-text}"
+    rounded: "{rounded.field}"
+    padding: "10px 8px"
 ---
 
 # Design System: Koonpinai
 
 ## Overview
 
-**Creative North Star: "A quiet place between classes"**
+**Creative North Star: "Contemporary Social Utility"**
 
-Koonpinai presents friends and their timetables with the restraint of a premium monochrome product. White space, ink typography and soft gray borders organize compact information; green and amber communicate availability. English and Thai share one self-hosted variable type family.
+Koonpinai makes a free window easy to spot. The approved Contemporary Social Utility (Concept C) world pairs a geometric K wordmark, Manrope typography, rounded-square initials and flat, ruled groups. Periwinkle identifies actions; green and amber describe availability while course hues identify subjects.
 
-The interface feels calm while remaining useful at a glance. Larger screens expose a directory and weekly planning grid; phones give each friend a readable day agenda. Motion describes interaction state, with no entrance choreography. These rules describe the current implementation, rather than an unbuilt theme.
+Light appearance uses a near-white canvas and white surfaces. Dark appearance translates the same hierarchy into blue-charcoal and navy surfaces with off-white ink. Both preserve the approved composition, readable Thai names, timetable positions and original PDF colors. Motion explains interaction state rather than staging page entrances.
 
 **Key Characteristics:**
 
-- Monochrome structure with restrained semantic availability color.
-- One bilingual sans-serif family and tabular timetable numerals.
-- Flat bordered surfaces with gently rounded controls.
-- Three-to-one-column directory and a mobile day agenda.
-- Explicit labels, visible keyboard focus and reduced-motion support.
+- Free-window-first information hierarchy.
+- Flat grouped rows, quiet dividers and rounded-square initials.
+- Self-hosted Manrope with Noto Sans Thai fallback.
+- Equivalent Light, Dark and System appearance.
+- Written status, visible focus and deliberate mobile layouts.
 
 ## Colors
 
-The palette is primarily white and ink with subtly warm green-gray neutrals. Frontmatter values are extracted from `src/app/globals.css`; CSS custom properties remain the implementation source of truth.
+The normative frontmatter records the actual light colors and their `dark-` counterparts from `src/app/redesign.css`. CSS custom properties remain the implementation source of truth; `.dark` switches role values without changing content or layout. The approved composition lives in `src/app/approved-design.css`; global shared/importer/admin styles load first, followed by that composition and the redesign overrides.
 
 ### Primary
 
-- **Ink** (`foreground`): primary text and filled actions. Its quieter hover tone is `primary-hover`.
-- **Availability green** (`free`, `free-bg`): free-state labels, pale free-state surfaces and caret color.
-- **Class amber** (`class`, `class-bg`): in-class and upcoming labels, plus relevant schedule warnings.
-- **Destructive red** (`danger`, `destructive-hover`): destructive actions, never availability.
+- **Periwinkle action:** `primary`, `primary-hover` and `primary-foreground` identify primary actions, links, active navigation, selection and focus. Dark appearance uses the corresponding soft-periwinkle role values and dark button ink.
+- **Availability green:** `free` and `free-bg` describe free and upcoming states. A free-window row shows duration with green text; its written status is unboxed.
+- **Class amber:** `class` and `class-bg` describe an ongoing class, with `class-marker` supporting timetable state. These roles do not identify a subject.
+- **Feedback red:** `danger`, `danger-hover` and `danger-bg` support destructive actions and feedback. Warning fields use `warning-border` and `warning-surface` with written messages.
+
+### Secondary
+
+Six muted subject pairs (`course-0` through `course-5`) retain green, ochre, violet, mauve, blue and clay identities across appearance modes. Four decorative avatar pairs provide restrained initials variety; the written nickname identifies the person. These colors do not encode availability.
 
 ### Neutral
 
-- **White** (`background`): page, card, dialog and primary-button text.
-- **Quiet canvas** (`surface`): search, segmented controls and empty states.
-- **Hover canvas** (`surface-hover`): secondary action hover and selected navigation.
-- **Soft line** (`border`): separators and flat surface boundaries.
-- **Muted olive-gray** (`muted`): secondary copy, dates and inactive navigation.
-- **Neutral status** (`status-neutral`, `status-neutral-text`): missing schedules and out-of-term states.
-- **Control details** (`input-border`, `input-focus`, `focus`, `ghost-text`): field boundaries, focus and secondary actions.
+`background` is the page canvas; `card` is the content surface; `foreground` is the main ink; `muted` is supporting text. `surface` and `surface-hover` support selected navigation, contextual strips and hover. `border` supplies quiet grouping rules, while `input-border` gives controls a stronger boundary. `today`, `selection`, `status-neutral`, `overlay` and timetable ribbon roles remain separate contextual treatments. Dark appearance preserves those roles rather than inverting source documents.
 
-The existing avatar initials and course blocks also use six subdued identifying tints each. These are local identity/course differentiation, not new brand accents or availability meanings. Keep their existing assignments local to those components.
+**The Status Has Words Rule.** Availability always includes a written label; color reinforces rather than replaces its meaning.
 
-**The Status Has Words Rule.** Availability always has a text label; color and dots reinforce it rather than carrying the meaning alone.
+**The Course Identity Rule.** Keep the six course identities stable across themes and separate from availability meaning. Preserve source-document colors.
 
 ## Typography
 
-**Display Font:** Noto Sans Thai Variable, with Noto Sans Thai and sans-serif fallbacks.
-**Body Font:** The same family, self-hosted through `@fontsource-variable/noto-sans-thai` in the root layout.
+**Display Font:** self-hosted Manrope variable (weights 200–800), served from `public/fonts/manrope.ttf` with its OFL license.
+**Body Font:** Manrope, with self-hosted Noto Sans Thai Variable coverage from `@fontsource-variable/noto-sans-thai`, then sans-serif.
 
-The type is contemporary and compact without changing voice between Thai and English. Weight and scale provide hierarchy; the system has no separate decorative display or monospace face.
+The typography is contemporary, compact and readable in English and Thai. Headings use weight and tight tracking for hierarchy; body copy stays relaxed. There is no separate decorative or monospace display family.
 
 ### Hierarchy
 
-- **Display:** the directory introduction uses `display`; at the tablet breakpoint it becomes (43px), then (36px) on phones and (32px) at the smallest breakpoint.
-- **Headline:** `headline` supplies the base page heading; phones use (34px), with component-specific profile/admin overrides.
-- **Title / subheading:** `title` and `subheading` supply section hierarchy. Directory friend names use (14px), weight (600), line-height (1.5), tracking (-0.01em); mobile names increase to (15px).
-- **Body:** `body` is the page default. Introductory copy is (15px), then (13px) on phones. Paragraphs have a maximum measure of (72ch).
-- **Label:** `label` describes standard buttons. Navigation is (12px), weight (450); status badges use `status`, with text remaining sentence case.
+- **Display:** the login story uses `display`; mobile scales it to (39px).
+- **Headline:** normal desktop page headings use `headline`. Directory mobile headings use (29px), standard mobile headings (31px), and profile headings (38px) desktop / (30px) mobile.
+- **Title:** section headings use `title`; directory headings use (21px), then (19px) on mobile. Subheadings use (17px), weight (700), line-height (1.4).
+- **Body:** `body` is the global default, with paragraphs limited to (64ch). Directory introductions use (15px); mobile supporting copy uses (12–13px).
+- **Label / status:** `label` describes shared buttons and `status` the labeled badges. Directory names range from (14–16px), with compact secondary names and time metadata below body size.
 
-Time, clock, counts, event times and time inputs use tabular numerals. Compact schedule metadata currently falls below body size; it is a local density choice, not a universal text-size recommendation.
+Times, the Bangkok clock, schedule axes and time inputs use tabular numerals. On mobile, text-entry fields use (16px) to preserve readable entry and avoid automatic zoom. Compact metadata sizes are local density choices, not general body-copy tokens.
 
-**The One Family Rule.** Keep English and Thai in the same self-hosted family, and use weight, spacing and tabular numerals to clarify the information.
+**The Bilingual Reading Rule.** Use Manrope for Latin text and Noto Sans Thai for Thai coverage; retain tabular numerals for time.
 
 ## Layout
 
-The desktop shell is centered with a maximum width of (1240px) and horizontal gutters of (40px). At a (1440px) viewport the directory shows three equal columns, separated by (16px); the profile exposes a seven-day weekly timetable with a (64px) time axis. The header minimum height is (80px). Introductory directory spacing is (66px) above and (40px) below.
+The main desktop shell has a maximum width of (1328px), including (44px) horizontal gutters and (44px) top padding. The header is (88px) high with a centered content alignment. At widths up to (1150px), shell gutters become (32px); up to (760px), they become (21px) with (26px) top padding and a (76px) header. At (360px) and below the main gutters become (16px).
 
-The directory becomes two columns at (1050px) and one at (700px). Horizontal shell gutters become (28px) at (1050px), (20px) at (700px), and (15px) at (360px). The shell expands to (1320px) with (55px) gutters at widths of at least (1450px). The list alternative becomes card-like again on phones; the desktop view switch disappears there.
+The directory leads with two-column free-person rows inside one flat bordered group; the list alternative uses one column. Each desktop row has (23px) padding. A compact in-class roster uses aligned identity, course/room, status and next-class columns with horizontal dividers. At (760px) or less, free rows become one column with (16px 14px) padding, roster headings disappear, and each roster entry exposes current course/room plus next-class time and name on separate lines. Preserve whole-row profile links and grouping rules.
 
-At widths of (900px) or less, the weekly grid is replaced by a day selector and vertically stacked agenda events. Do not squeeze seven tiny day columns into the phone view. At (700px), the search fills its own toolbar row, navigation has a minimum target height of (44px), and the header clock is hidden. Agenda blocks use (19px 16px) padding and (12px) gaps.
+Mobile navigation is fixed to the bottom, reserves (78px) body space and includes safe-area padding. Desktop navigation stays in the header. The current route is visible in both. Personal strips and account entries appear only when the preview boundary permits them.
 
-Spacing is a practical family of small steps, not a claim that every measured gap lies on one rigid scale. Use frontmatter spacing for repeated rhythm, while keeping established component padding and layout breakpoints.
+The friend timetable keeps the seven-day desktop grid, exact event positions and overlapping columns. At (900px) or less it switches to a day selector and agenda. The PDF workspace shows source and review side by side on desktop, stacks at tablet widths, and uses Source/Review panel controls at (760px) or less. Login and onboarding split narratives/forms on desktop and stack on phones.
 
 ## Elevation & Depth
 
-Most surfaces are flat and separated by a border, a pale background or whitespace. Directory cards gain a slightly stronger border and near-white background on hover, without lifting. Selected filter/day segments have a small structural shadow; modal dialogs sit above a dimmed overlay with a diffuse shadow. The exact shadow values live in the sidecar.
+Ordinary surfaces are flat. Rules and background tone define directory groups, roster rows, schedule summaries and form panels. Hover changes tone without translating or lifting rows. Selected segments have no cast shadow. Dialogs and the theme-preference popover use the theme-specific `dialog-shadow`; the sidecar records its exact values.
 
-**The Flat Surface Rule.** Use borders and tone for ordinary hierarchy; reserve cast shadows for selected segments and modal depth.
+**The Flat Group Rule.** Use tone, spacing and rules for ordinary hierarchy; reserve cast shadows for dialogs and the theme popover.
 
-Interactive color, border and shadow state changes use (160ms ease). The dialog overlay has a brief (150ms ease-out) fade; skeleton feedback uses an alternating (1.5s ease-in-out) animation. Neither is page entrance choreography. Reduced-motion preferences remove animations and transitions.
+Color, border and shadow state changes use (160ms ease). Modal overlays fade at (150ms ease-out); loading skeletons use (1.5s ease-in-out) feedback. Reduced-motion preferences remove transitions and animations and restore automatic scrolling. No entrance choreography is part of the system.
 
 ## Shapes
 
-The recurring form is a softly bordered rectangle. Standard controls use `control`; fields are slightly tighter with `input`; friend cards use `card`; weekly timetable containers use `timetable`; dialogs use `dialog`. Status labels are small rounded rectangles, not pill buttons. Initial avatars are circular, and status dots inherit their label color.
+The shared form is a gently rounded rectangle. Controls use `control`, status labels use `badge`, directory and summary containers use `container`, and timetable blocks use `field`. Initials avatars are rounded squares, with (48px) standard size and `avatar` rounding; larger profile initials use (84px) and `profile-avatar`. Mobile variants scale these down rather than becoming circular portraits.
 
-Field borders are (1px); the global keyboard focus outline is (2px), offset by (4px). Focus is visible on controls and links. Card boundaries and internal separators remain quiet enough to keep names, state and timetable information dominant.
+Group and field boundaries are (1px). Ordinary controls use a (3px) primary-colored keyboard outline offset by (3px); search uses a focus-within outline. Preserve stronger input boundaries separately from quiet decorative rules. Theme switch and preference disclosure targets remain (44px) square.
 
 ## Components
 
 ### Buttons
 
-Compact and deliberate. The shared Button exposes `default`, `outline`, `ghost` and `destructive` variants, plus default, `sm` and `icon` sizes. Default controls have a minimum height of (42px), gap (8px), and label typography. Small controls use minimum height (34px), padding (6px 10px) and text (12px); icon controls are (40px) square. Disabled buttons use opacity (0.45) and a not-allowed cursor. Hover changes color or background; keyboard focus uses the global outline.
+Primary actions use periwinkle with contrasting foreground, at least (44px) high, (9px 16px) padding and weight (650). Outline actions use a card surface and input border; ghost actions use transparent fill. Both hover to a surface tint. Destructive actions use semantic danger ink on the danger wash. Hover keeps that wash and changes both ink and border to `danger-hover`; it does not fill the button with the text color. Disabled buttons use opacity (0.45) with a not-allowed cursor. The SSO action keeps label-first row order and explains disconnected sign-in rather than implying an account is created.
 
 ### Inputs / Fields
 
-White, softly outlined fields use the `input` tokens, minimum height (42px), text (13px) and line-height (1.5). Focus strengthens the border. Invalid fields currently use an amber border and pale warning background. Search is a surface-tinted field with an inline SVG icon and (39px) left padding, becoming white on focus; the mobile directory search has minimum height (46px).
-
-On phones, form fields and directory search use (16px) text to keep entry readable and avoid automatic input zoom. Import source controls and session actions have minimum (44px) targets.
+Shared fields use a card surface, foreground ink, an input boundary, (45px) minimum height and (9px 12px) padding. Onboarding/profile fields use a slightly tighter corner and (10px 12px) padding; mobile fields are (47px) high with (16px) text. Search includes an inline outline icon, a real text input and a focus-within treatment. Invalid or uncertain values pair warning borders with explicit review text. Do not replace native labels or required/disabled semantics with color.
 
 ### Navigation
 
-Text and Lucide outline icons sit in softly rounded links. Inactive navigation is muted; hover adds the quiet canvas, while the current route uses the hover canvas and ink text. On phones the header compresses, the secondary clock disappears, and navigation targets become taller. Keep the bilingual wordmark together.
+Desktop links use outline icons, medium-weight text, (12px 16px) padding and softly rounded corners. Active links use periwinkle ink on the surface wash. Mobile bottom links combine icon and text with the same active distinction. Theme controls offer a direct Sun/Moon switch and an Appearance disclosure with Light/Dark/System radios, keyboard Escape dismissal and focus return. OS appearance is the default; only the visual preference persists locally.
 
 ### Chips
 
-Status badges combine a current-color dot with a written status. Free is green; in-class and upcoming are amber; no-schedule and out-of-term are neutral. Badges are indicators rather than interactive filters. Interactive filtering instead uses a surface-tinted segmented group, with white selected segments, ink labels, small count tags and a restrained selected shadow.
+Status badges pair a dot with text: free/upcoming green, in-class amber, no-schedule/out-of-term neutral. In free-window rows the same status is unboxed under the duration. Availability filters are separate controls with count labels: the selected filter uses foreground ink as fill and background-colored text, while unselected filters remain muted with tonal hover. Day selection uses the primary action pair.
 
 ### Cards / Containers
 
-Directory cards are whole-card profile links, with an initials avatar, bilingual name, status, present/next class information and a separated bottom row. Default padding is in `friend-card`; phones use (20px 20px 14px), and very wide layouts use (25px 25px 17px). Preserve keyboard focus for the whole link. Do not add independent floating shadows or decorative images.
+The directory is a grouped flat container with ruled child links, not a set of lifted cards. Free rows place initials/name on the left and free-window duration on the right; in-class rows preserve separators and course/room/next-class content. Summaries, policy and access panels use the same card surface and quiet boundaries. Keep the approved composition and source data rather than substituting mockup records.
 
-### Timetable Ribbon and Agenda
+### Timetable and Agenda
 
-The directory's miniature ribbon spans (08–18), showing actual class intervals on a (4px) track. A stronger amber segment indicates an ongoing class; a thin vertical marker shows the current time. It is supplemental to the written status and is hidden from assistive technology in the implementation.
+Six subject pairs color events consistently in both themes. The current class has an inset amber marker, today has a subtle contextual column, and all events retain exact schedule geometry. Agenda entries expose start/end times, course and room as larger readable content. Short desktop events may hide secondary metadata instead of distorting their true duration. Clicking an event opens the existing Radix class-detail dialog.
 
-The weekly timetable uses softly tinted course blocks and an inset outline for the current class. On smaller screens the day selector gives access to larger agenda events with start/end times, course names and room information. These are two presentations of the same schedule, not separate content systems.
+### PDF Review and Account Preview
 
-### Dialogs
+Source preview preserves the PDF's actual colors on its canvas, with page/zoom controls and a keyboard-focusable source region. Review retains individual sessions, source references, editable fields, warnings and explicit confirmation before preview/export. Mobile Source/Review controls switch panels without inventing a separate content model.
 
-Centered white dialogs have width `min(460px, calc(100vw - 32px))`, maximum height `calc(100svh - 48px)`, scrollable content, padding (32px), a close control and modal depth. Phone padding is (29px 23px). The implementation uses Radix dialog primitives for focus and interaction behavior.
-
-### PDF Review
-
-The original PDF and editable sessions share a two-column desktop workspace, then stack at (900px). The source is a contained, keyboard-focusable canvas region with page and zoom controls. Session rows expand into labeled fields without collapsing during edits. Missing values and OCR uncertainty use the established warning treatment, paired with written messages and source-page references. Review confirmation precedes the private timetable/profile preview and JSON download; the interface makes no persistence or publishing claim.
+Account, policy, approval and access surfaces extend this vocabulary with honest temporary-state notices. Completed steps derive from the actual in-memory profile/policy state; approval and SSO remain disconnected. Interface appearance never implies data persistence or permission.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** keep white, ink and soft borders as the structural palette.
-- **Do** accompany semantic color with readable status text.
-- **Do** use the same self-hosted Noto Sans Thai family for English and Thai.
-- **Do** preserve the three/two/one-column directory and the day agenda at widths of 900px or less.
-- **Do** retain visible keyboard focus, tabular times and reduced-motion support.
+- **Do** preserve the approved Concept C composition and free-window hierarchy.
+- **Do** keep course identities consistent across themes and show PDF source colors faithfully.
+- **Do** retain written statuses, visible focus, labeled controls and reduced-motion behavior.
+- **Do** preserve mobile next-class names and the day agenda instead of compressing a weekly grid.
+- **Do** label fictional data, temporary edits and disconnected account actions honestly.
 
 ### Don't:
 
-- **Don't** introduce saturated decorative accents or reinterpret course tints as availability colors.
-- **Don't** add page entrance choreography to the quiet product interface.
-- **Don't** add cast shadows to ordinary directory cards.
-- **Don't** use tiny timetable metadata sizes as the default for new body copy or controls.
-- **Don't** replace written availability labels with color-only dots.
+- **Don't** restore the superseded Blue Mist palette or three-column card directory.
+- **Don't** use course colors as availability meaning.
+- **Don't** add heavy shadows, gradients, neon accents or page entrance choreography.
+- **Don't** treat compact timetable metadata sizes as the default for new body text.
+- **Don't** imply that preview edits save, publish, submit approval or grant access.

@@ -98,7 +98,7 @@ export function WeeklyTimetable({
                   <button
                     key={s.id}
                     aria-label={`${s.name}, ${DAYS[d]} ${s.start} to ${s.end}, ${s.room}${currentIds.includes(s.id) ? ", ongoing" : ""}`}
-                    className={`timetable-event course-${s.color} ${currentIds.includes(s.id) ? "event-ongoing" : ""}`}
+                    className={`timetable-event course-${s.color} ${minutes(s.end) - minutes(s.start) < 120 ? "short-event" : ""} ${currentIds.includes(s.id) ? "event-ongoing" : ""}`}
                     style={{
                       top: `${((minutes(s.start) - start) / (end - start)) * 100}%`,
                       height: `${((minutes(s.end) - minutes(s.start)) / (end - start)) * 100}%`,

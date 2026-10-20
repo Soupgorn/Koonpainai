@@ -91,7 +91,11 @@ test("real embedded text extraction, editable review, private profile and canoni
   await expect(
     page.getByRole("button", { name: "Preview schedule" }),
   ).toBeEnabled();
-  await expect(page.locator(".pdf-canvas-scroll canvas")).toBeVisible();
+  if (info.project.name === "mobile") {
+    await page.getByRole("button", { name: "Original PDF", exact: true }).click();
+    await expect(page.locator(".pdf-canvas-scroll canvas")).toBeVisible();
+    await page.getByRole("button", { name: /Review classes/ }).click();
+  } else await expect(page.locator(".pdf-canvas-scroll canvas")).toBeVisible();
   await capture(page, `${info.project.name}-review`);
   const reviewA11y = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])

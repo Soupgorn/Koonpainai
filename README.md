@@ -1,6 +1,6 @@
 # Koonpinai / คุณไปไหน
 
-Find your people. Catch a break together.
+Find a break together.
 
 A Next.js application that calculates friends’ availability from class timetables in **Asia/Bangkok**. It includes a responsive public directory and a **real, browser-side KMITL timetable PDF importer**. Availability describes the timetable, not attendance or GPS location.
 
@@ -27,30 +27,50 @@ npm run build
 npm start
 ```
 
-Browser tests reuse a development server on port 3000 or start one. Stop a production server on that port before running them: production deliberately disables admin routes by default.
+Browser tests reuse a development server on port 3000 or start one. Stop a production server on that port before running them: production deliberately disables preview and admin routes by default. To run only the theme checks, use `npm run test:e2e -- tests/browser/themes.spec.ts`. These are rerun instructions, not a claim that checks passed on the current checkout.
 
 ## Pages
 
 | Route | Functionality |
 | --- | --- |
-| `/` | Fictional friend directory, English/Thai nickname search, availability filters, grid/list views, current course/room/end time, and next class |
-| `/friends/[id]` | Current availability, Monday–Sunday desktop timetable, mobile/tablet day agenda, overlapping classes, and class-detail dialogs |
-| `/admin` | Temporary demonstration of friend management; changes reset on reload and do not update the public directory |
+| `/` | Twelve fictional friends; English/Thai nickname search, availability filters, two-column free-window rows/list alternative, and a ruled in-class roster |
+| `/friends/[id]` | Current availability, Monday–Sunday desktop timetable, mobile/tablet day agenda, exact class positions/overlaps, and class-detail dialogs |
+| `/login` | Public informational entry; KMITL SSO is disconnected and its button explains that no account is created |
+| `/onboarding` | In-memory fictional profile preview |
+| `/onboarding/policy` | Proposed sharing policy and in-memory acknowledgment |
+| `/pending-approval` | Approval preview; profile/policy completion reflects actual in-memory state and no approval request is submitted |
+| `/my-timetable` | Temporary personal timetable; can display a reviewed real import without publishing it |
+| `/my-timetable/import` | Real browser-side PDF importer reused for the temporary personal timetable |
+| `/account` | In-memory profile settings, appearance, and proposed sharing/access information |
+| `/admin` | Temporary friend management; changes reset on reload and do not update the public directory |
+| `/admin/access` | Fictional Pending/Approved/Suspended access records; changing them grants no access and sends no request |
 | `/admin/import` | Real PDF selection, text/OCR extraction, source preview, editable review, validation, private timetable/profile preview, and JSON export |
 
+The onboarding, policy, pending-approval, personal-timetable/import and account routes are server-guarded previews: available in development or with `ENABLE_UI_PREVIEW=true`; otherwise they return 404. The public login page only exposes preview links when that guard is enabled. All `/admin` routes use the separate development/`ENABLE_ADMIN_DEMO=true` guard. Neither flag is authentication.
+
 The public directory still contains twelve explicitly fictional friends. “Try a class-time preview” switches the app clock to Tuesday 20 October 2026 at 10:30 Bangkok time. The preview is labeled above the directory and can be switched back to the live clock. Imported timetable preview also discloses the selected clock; it does not label imported data as fictional.
+
+## Interface and appearance
+
+The approved **Contemporary Social Utility (Concept C)** composition puts free-window length first, followed by current course/room and next-class details. The geometric K wordmark, self-hosted Manrope with Noto Sans Thai fallback, near-white canvas, flat white surfaces, periwinkle actions and navy text replace the earlier Blue Mist treatment. Green availability and amber class states remain separate from six stable course-color identities. English is the interface language; Thai branding and names are supported.
+
+Desktop uses two-column free-person rows and a ruled in-class roster. At 760px or less, the directory becomes one column and navigation moves to a fixed bottom bar; next-class time and course name remain visible. At 900px or less, weekly timetables switch to a day agenda. Mobile PDF review has Source/Review controls; desktop shows both panels. The original PDF retains its source colors in either theme.
+
+Light, Dark and System appearance use `next-themes`. The default follows the operating system. The header Sun/Moon toggle and preference disclosure each have a 44px target; the disclosure offers labeled Light/Dark/System radio choices. Account preview offers the same preferences. Only this visual preference persists in local storage, under `koonpinai-theme`. A pre-hydration theme script, root hydration-warning suppression and mount-aware controls handle initial theme resolution.
+
+Keyboard focus, written status labels, native labeled forms, Radix dialogs, a skip link and reduced-motion behavior are part of the interface. Contrast targets are 4.5:1 for normal text, 3:1 for large text, and discernible input/focus boundaries. Source tokens are in `src/app/redesign.css`, the approved composition is in `src/app/approved-design.css`, and importer/admin/shared styles remain in `src/app/globals.css`; the root layout loads globals, approved composition, then redesign overrides. See [DESIGN.md](DESIGN.md) for the implemented system.
 
 ## Import a real KMITL timetable
 
 1. Export your timetable as a PDF, normally the visual weekly grid followed by detailed course records.
 2. Open `/admin/import`, select or drop **one PDF**, and choose **Read timetable**.
 3. The app checks each page independently. Usable embedded text is read directly; image-only or insufficient-text pages run Thai and English OCR. Mixed documents are supported.
-4. Compare the original PDF with each extracted session. Use the page controls, zoom, or a session’s page reference. On smaller screens the source and editor stack vertically.
+4. Compare the original PDF with each extracted session. Use the page controls, zoom, or a session’s page reference. On tablet widths the source and editor stack vertically; at mobile widths use Source/Review controls to switch panels.
 5. Enter your chosen nickname and the **actual academic start/end dates**. The document’s creation date is never treated as the semester start.
 6. Correct missing/uncertain fields. Add or remove sessions when needed, then confirm that you checked the records against the PDF.
 7. Preview the weekly timetable or the existing friend-profile UI. Download the validated JSON.
 
-There is **no public publish action**. Reloading or leaving the import page clears its state. Downloading JSON does not save anything to a server or modify the public directory.
+There is **no public publish action**. Reloading or leaving the import page clears the importer state. Downloading JSON does not save anything to a server or modify the public directory. In `/my-timetable/import`, a validated, explicitly reviewed preview can also be applied with **Use in my temporary preview**. That timetable remains in the in-memory personal provider during client navigation and resets on reload; it is never added to the public directory.
 
 ### File and resource limits
 
@@ -141,14 +161,17 @@ See [UI_AUDIT.md](UI_AUDIT.md) for the UI review and refinements, [DESIGN.md](DE
 
 ## Production and future persistence
 
-Production admin URLs return **404 by default**, and the Admin link is hidden. For an intentional local-only production preview, set `ENABLE_ADMIN_DEMO=true` **before building and starting**. This flag enables the temporary management/import UI; it is not authentication. It must never authorize a future server write API.
+| Environment setting | Current behavior |
+| --- | --- |
+| `ENABLE_UI_PREVIEW=true` | Enables the server-guarded onboarding, policy, approval, personal timetable/import and account previews outside development |
+| `ENABLE_ADMIN_DEMO=true` | Enables the temporary `/admin`, `/admin/access` and `/admin/import` UI outside development |
+| `NEXT_PUBLIC_PDF_MAX_MB` | Public, build-time PDF size limit from 1 to 50 MiB; defaults to 10 MiB |
+| `KOONPINAI_TEST_PDF` | Optional local test input only; never a production setting or a committed private file |
 
-Remaining production work:
+Production returns **404 by default** for preview and admin routes, with their navigation hidden. For an intentional local production preview, set the relevant flag before building and starting. The login information page remains public with disconnected SSO and no preview entry links by default. Preview flags never authorize a future server write API.
 
-1. Add real administrator authentication and server-side authorization for every data mutation.
-2. Implement the private GitHub JSON adapter with server-only credentials, schema validation, safe concurrent updates, cache invalidation, and recoverable publish errors. The current async read boundary is `src/lib/friends-repository.ts`.
-3. Add a deliberate authenticated approval/publish flow. Do not upload original PDFs automatically.
-4. Test additional KMITL export variants and decide the model for timetable exceptions.
-5. Replace the fictional public records with approved schedules and define privacy/removal rules. Sample pages intentionally use `noindex` metadata.
+The planned service flow is university sign-in, profile setup, sharing-policy acknowledgment, administrator approval, then authorized timetable sharing. Current screens demonstrate that flow only: no real SSO, Keycloak, PostgreSQL, Drizzle, write API, GitHub JSON storage or deployment is configured. Access management does not grant access. Policy and profile completion reflect local state, not a server record.
 
-No database or GitHub access token is included. GitHub source-code publication is separate from publishing a user’s timetable data.
+Before production use, connect real authentication, approve accounts, enforce server authorization on every write, and implement an explicitly approved persistence/publish flow. The current async read boundary remains `src/lib/friends-repository.ts`; no storage adapter has been selected or implemented here. Confirm privacy/removal rules before replacing fictional records with approved schedules, retain deliberate review before sharing, and never upload original PDFs automatically. Additional KMITL export variants and timetable exceptions still need validation. Sample pages use `noindex` metadata.
+
+No database credentials, API keys or GitHub access token are included. GitHub source-code publication is separate from publishing a user’s timetable data. This documentation update does not publish, commit, push or deploy the app.
