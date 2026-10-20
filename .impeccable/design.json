@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-20T10:14:29.678167+00:00",
+  "title": "Design System: Koonpinai",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "Background",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(61% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(84% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "foreground": {
+        "role": "primary",
+        "displayName": "Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0058 156.79)",
+          "oklch(26% 0.0058 156.79)",
+          "oklch(38% 0.0058 156.79)",
+          "oklch(49% 0.0058 156.79)",
+          "oklch(61% 0.0058 156.79)",
+          "oklch(72% 0.0058 156.79)",
+          "oklch(84% 0.0058 156.79)",
+          "oklch(95% 0.0058 156.79)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0028 128.49)",
+          "oklch(26% 0.0028 128.49)",
+          "oklch(38% 0.0028 128.49)",
+          "oklch(49% 0.0028 128.49)",
+          "oklch(61% 0.0028 128.49)",
+          "oklch(72% 0.0028 128.49)",
+          "oklch(84% 0.0028 128.49)",
+          "oklch(95% 0.0028 128.49)"
+        ]
+      },
+      "surface-hover": {
+        "role": "neutral",
+        "displayName": "Surface Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0057 128.53)",
+          "oklch(26% 0.0057 128.53)",
+          "oklch(38% 0.0057 128.53)",
+          "oklch(49% 0.0057 128.53)",
+          "oklch(61% 0.0057 128.53)",
+          "oklch(72% 0.0057 128.53)",
+          "oklch(84% 0.0057 128.53)",
+          "oklch(95% 0.0057 128.53)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "tonalRamp": [
+          "oklch(15% 0.0070 124.45)",
+          "oklch(26% 0.0070 124.45)",
+          "oklch(38% 0.0070 124.45)",
+          "oklch(49% 0.0070 124.45)",
+          "oklch(61% 0.0070 124.45)",
+          "oklch(72% 0.0070 124.45)",
+          "oklch(84% 0.0070 124.45)",
+          "oklch(95% 0.0070 124.45)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0208 135.02)",
+          "oklch(26% 0.0208 135.02)",
+          "oklch(38% 0.0208 135.02)",
+          "oklch(49% 0.0208 135.02)",
+          "oklch(61% 0.0208 135.02)",
+          "oklch(72% 0.0208 135.02)",
+          "oklch(84% 0.0208 135.02)",
+          "oklch(95% 0.0208 135.02)"
+        ]
+      },
+      "free": {
+        "role": "primary",
+        "displayName": "Free",
+        "tonalRamp": [
+          "oklch(15% 0.0946 160.08)",
+          "oklch(26% 0.0946 160.08)",
+          "oklch(38% 0.0946 160.08)",
+          "oklch(49% 0.0946 160.08)",
+          "oklch(61% 0.0946 160.08)",
+          "oklch(72% 0.0946 160.08)",
+          "oklch(84% 0.0946 160.08)",
+          "oklch(95% 0.0946 160.08)"
+        ]
+      },
+      "free-bg": {
+        "role": "neutral",
+        "displayName": "Free Bg",
+        "tonalRamp": [
+          "oklch(15% 0.0133 152.60)",
+          "oklch(26% 0.0133 152.60)",
+          "oklch(38% 0.0133 152.60)",
+          "oklch(49% 0.0133 152.60)",
+          "oklch(61% 0.0133 152.60)",
+          "oklch(72% 0.0133 152.60)",
+          "oklch(84% 0.0133 152.60)",
+          "oklch(95% 0.0133 152.60)"
+        ]
+      },
+      "class": {
+        "role": "primary",
+        "displayName": "Class",
+        "tonalRamp": [
+          "oklch(15% 0.1058 70.02)",
+          "oklch(26% 0.1058 70.02)",
+          "oklch(38% 0.1058 70.02)",
+          "oklch(49% 0.1058 70.02)",
+          "oklch(61% 0.1058 70.02)",
+          "oklch(72% 0.1058 70.02)",
+          "oklch(84% 0.1058 70.02)",
+          "oklch(95% 0.1058 70.02)"
+        ]
+      },
+      "class-bg": {
+        "role": "neutral",
+        "displayName": "Class Bg",
+        "tonalRamp": [
+          "oklch(15% 0.0216 83.26)",
+          "oklch(26% 0.0216 83.26)",
+          "oklch(38% 0.0216 83.26)",
+          "oklch(49% 0.0216 83.26)",
+          "oklch(61% 0.0216 83.26)",
+          "oklch(72% 0.0216 83.26)",
+          "oklch(84% 0.0216 83.26)",
+          "oklch(95% 0.0216 83.26)"
+        ]
+      },
+      "danger": {
+        "role": "primary",
+        "displayName": "Danger",
+        "tonalRamp": [
+          "oklch(15% 0.1494 26.89)",
+          "oklch(26% 0.1494 26.89)",
+          "oklch(38% 0.1494 26.89)",
+          "oklch(49% 0.1494 26.89)",
+          "oklch(61% 0.1494 26.89)",
+          "oklch(72% 0.1494 26.89)",
+          "oklch(84% 0.1494 26.89)",
+          "oklch(95% 0.1494 26.89)"
+        ]
+      },
+      "primary-hover": {
+        "role": "neutral",
+        "displayName": "Primary Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0141 141.20)",
+          "oklch(26% 0.0141 141.20)",
+          "oklch(38% 0.0141 141.20)",
+          "oklch(49% 0.0141 141.20)",
+          "oklch(61% 0.0141 141.20)",
+          "oklch(72% 0.0141 141.20)",
+          "oklch(84% 0.0141 141.20)",
+          "oklch(95% 0.0141 141.20)"
+        ]
+      },
+      "destructive-hover": {
+        "role": "neutral",
+        "displayName": "Destructive Hover",
+        "tonalRamp": [
+          "oklch(15% 0.1302 26.99)",
+          "oklch(26% 0.1302 26.99)",
+          "oklch(38% 0.1302 26.99)",
+          "oklch(49% 0.1302 26.99)",
+          "oklch(61% 0.1302 26.99)",
+          "oklch(72% 0.1302 26.99)",
+          "oklch(84% 0.1302 26.99)",
+          "oklch(95% 0.1302 26.99)"
+        ]
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "Focus",
+        "tonalRamp": [
+          "oklch(15% 0.0385 146.27)",
+          "oklch(26% 0.0385 146.27)",
+          "oklch(38% 0.0385 146.27)",
+          "oklch(49% 0.0385 146.27)",
+          "oklch(61% 0.0385 146.27)",
+          "oklch(72% 0.0385 146.27)",
+          "oklch(84% 0.0385 146.27)",
+          "oklch(95% 0.0385 146.27)"
+        ]
+      },
+      "input-border": {
+        "role": "neutral",
+        "displayName": "Input Border",
+        "tonalRamp": [
+          "oklch(15% 0.0112 123.47)",
+          "oklch(26% 0.0112 123.47)",
+          "oklch(38% 0.0112 123.47)",
+          "oklch(49% 0.0112 123.47)",
+          "oklch(61% 0.0112 123.47)",
+          "oklch(72% 0.0112 123.47)",
+          "oklch(84% 0.0112 123.47)",
+          "oklch(95% 0.0112 123.47)"
+        ]
+      },
+      "input-focus": {
+        "role": "neutral",
+        "displayName": "Input Focus",
+        "tonalRamp": [
+          "oklch(15% 0.0393 143.79)",
+          "oklch(26% 0.0393 143.79)",
+          "oklch(38% 0.0393 143.79)",
+          "oklch(49% 0.0393 143.79)",
+          "oklch(61% 0.0393 143.79)",
+          "oklch(72% 0.0393 143.79)",
+          "oklch(84% 0.0393 143.79)",
+          "oklch(95% 0.0393 143.79)"
+        ]
+      },
+      "ghost-text": {
+        "role": "neutral",
+        "displayName": "Ghost Text",
+        "tonalRamp": [
+          "oklch(15% 0.0221 137.85)",
+          "oklch(26% 0.0221 137.85)",
+          "oklch(38% 0.0221 137.85)",
+          "oklch(49% 0.0221 137.85)",
+          "oklch(61% 0.0221 137.85)",
+          "oklch(72% 0.0221 137.85)",
+          "oklch(84% 0.0221 137.85)",
+          "oklch(95% 0.0221 137.85)"
+        ]
+      },
+      "status-neutral": {
+        "role": "neutral",
+        "displayName": "Status Neutral",
+        "tonalRamp": [
+          "oklch(15% 0.0041 121.56)",
+          "oklch(26% 0.0041 121.56)",
+          "oklch(38% 0.0041 121.56)",
+          "oklch(49% 0.0041 121.56)",
+          "oklch(61% 0.0041 121.56)",
+          "oklch(72% 0.0041 121.56)",
+          "oklch(84% 0.0041 121.56)",
+          "oklch(95% 0.0041 121.56)"
+        ]
+      },
+      "status-neutral-text": {
+        "role": "neutral",
+        "displayName": "Status Neutral Text",
+        "tonalRamp": [
+          "oklch(15% 0.0250 130.27)",
+          "oklch(26% 0.0250 130.27)",
+          "oklch(38% 0.0250 130.27)",
+          "oklch(49% 0.0250 130.27)",
+          "oklch(61% 0.0250 130.27)",
+          "oklch(72% 0.0250 130.27)",
+          "oklch(84% 0.0250 130.27)",
+          "oklch(95% 0.0250 130.27)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Directory introduction; smaller responsive overrides."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Base page heading."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section heading."
+      },
+      "subheading": {
+        "displayName": "Subheading",
+        "purpose": "Subsection heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default reading text, with 72ch paragraph limit."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Standard action label."
+      },
+      "status": {
+        "displayName": "Status",
+        "purpose": "Compact written availability label."
+      }
+    },
+    "shadows": [
+      {
+        "name": "selected-segment",
+        "value": "0 1px 3px #20232112",
+        "purpose": "Selected availability filters and mobile day selector."
+      },
+      {
+        "name": "dialog",
+        "value": "0 15px 60px #20232124",
+        "purpose": "Modal depth above the dimmed overlay."
+      },
+      {
+        "name": "event-hover",
+        "value": "inset 0 0 0 1px currentColor",
+        "purpose": "Hovered timetable course block."
+      },
+      {
+        "name": "event-ongoing",
+        "value": "inset 0 0 0 1px #95711f",
+        "purpose": "Current timetable class."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-state",
+        "value": "160ms ease",
+        "purpose": "Background-color, color, border-color and box-shadow transitions."
+      },
+      {
+        "name": "overlay-fade",
+        "value": "150ms ease-out",
+        "purpose": "Dialog overlay feedback; no page entrance choreography."
+      },
+      {
+        "name": "skeleton",
+        "value": "1.5s ease-in-out infinite alternate",
+        "purpose": "Loading feedback only."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "prefers-reduced-motion: reduce removes all animation and transition and sets scroll-behavior:auto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "min-width: 1450px"
+      },
+      {
+        "name": "tablet",
+        "value": "max-width: 1050px"
+      },
+      {
+        "name": "agenda",
+        "value": "max-width: 900px"
+      },
+      {
+        "name": "phone",
+        "value": "max-width: 700px"
+      },
+      {
+        "name": "small-phone",
+        "value": "max-width: 360px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Shared primary button with the implemented default sizing and keyboard focus.",
+      "html": "<button type=\"button\" class=\"ds-button-primary\">View schedule</button>",
+      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 16px;border-radius:8px;border:1px solid transparent;font-size:13px;line-height:1.5;font-weight:500;white-space:nowrap;cursor:pointer;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;background:var(--foreground,#202321);color:var(--background,#ffffff);}.ds-button-primary:hover:not(:disabled){background:#3f453e;}.ds-button-primary:focus-visible{outline:2px solid var(--focus,#526653);outline-offset:4px;}.ds-button-primary:disabled{opacity:.45;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none;}}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Shared outline button with the implemented default sizing and keyboard focus.",
+      "html": "<button type=\"button\" class=\"ds-button-outline\">Back to friends</button>",
+      "css": ".ds-button-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 16px;border-radius:8px;border:1px solid transparent;font-size:13px;line-height:1.5;font-weight:500;white-space:nowrap;cursor:pointer;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;background:var(--background,#ffffff);color:var(--foreground,#202321);border-color:var(--border,#e5e7e2);}.ds-button-outline:hover:not(:disabled){background:var(--surface-hover,#f1f3ef);}.ds-button-outline:focus-visible{outline:2px solid var(--focus,#526653);outline-offset:4px;}.ds-button-outline:disabled{opacity:.45;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-outline{transition:none;}}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Shared ghost button with the implemented default sizing and keyboard focus.",
+      "html": "<button type=\"button\" class=\"ds-button-ghost\">Try a class-time preview</button>",
+      "css": ".ds-button-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 16px;border-radius:8px;border:1px solid transparent;font-size:13px;line-height:1.5;font-weight:500;white-space:nowrap;cursor:pointer;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;background:transparent;color:#555e52;}.ds-button-ghost:hover:not(:disabled){background:var(--surface-hover,#f1f3ef);}.ds-button-ghost:focus-visible{outline:2px solid var(--focus,#526653);outline-offset:4px;}.ds-button-ghost:disabled{opacity:.45;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-ghost{transition:none;}}"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Shared destructive button with the implemented default sizing and keyboard focus.",
+      "html": "<button type=\"button\" class=\"ds-button-destructive\">Remove timetable</button>",
+      "css": ".ds-button-destructive{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 16px;border-radius:8px;border:1px solid transparent;font-size:13px;line-height:1.5;font-weight:500;white-space:nowrap;cursor:pointer;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;background:var(--danger,#a93832);color:var(--background,#ffffff);}.ds-button-destructive:hover:not(:disabled){background:#8a2b26;}.ds-button-destructive:focus-visible{outline:2px solid var(--focus,#526653);outline-offset:4px;}.ds-button-destructive:disabled{opacity:.45;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-button-destructive{transition:none;}}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard field with border focus and an amber invalid state.",
+      "html": "<input class=\"ds-input\" aria-label=\"Friend nickname\" placeholder=\"Friend nickname\" />",
+      "css": ".ds-input{font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;width:100%;min-width:0;min-height:42px;padding:9px 12px;background:var(--background,#ffffff);color:var(--foreground,#202321);border:1px solid #daddd5;border-radius:7px;font-size:13px;line-height:1.5;caret-color:var(--free,#23714e);}.ds-input::placeholder{color:#72776e;opacity:1;}.ds-input:focus{border-color:#6e826d;}.ds-input:focus-visible{outline:2px solid var(--focus,#526653);outline-offset:4px;}.ds-input[aria-invalid=\"true\"]{border-color:#b97a24;background:#fffdf7;}@media(prefers-reduced-motion:reduce){.ds-input{transition:none;}}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Muted links with a quiet selected-route surface; inline Lucide outline icons.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main\"><a class=\"ds-nav-link ds-active\" href=\"#friends\" aria-current=\"page\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/></svg>Friends</a><a class=\"ds-nav-link\" href=\"#admin\">Admin</a></nav>",
+      "css": ".ds-nav{display:flex;gap:12px;align-items:center;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;}.ds-nav-link{display:inline-flex;gap:7px;align-items:center;padding:8px 12px;border-radius:6px;color:var(--muted,#687064);font-size:12px;font-weight:450;text-decoration:none;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;}.ds-nav-link:hover{background:var(--surface,#f8f9f7);color:var(--foreground,#202321);}.ds-nav-link.ds-active{background:var(--surface-hover,#f1f3ef);color:var(--foreground,#202321);}.ds-nav-link:focus-visible{outline:2px solid var(--focus,#526653);outline-offset:4px;}@media(max-width:700px){.ds-nav{gap:0}.ds-nav-link{padding:8px 9px;font-size:11px;min-height:44px;}}@media(prefers-reduced-motion:reduce){.ds-nav-link{transition:none;}}"
+    },
+    {
+      "name": "Availability Badges",
+      "kind": "chip",
+      "refersTo": "status-free",
+      "description": "Read-only status labels with semantic color and a current-color dot; amber refers to status-class.",
+      "html": "<span class=\"ds-badge ds-free\"><span class=\"ds-dot\" aria-hidden=\"true\"></span>Free now</span> <span class=\"ds-badge ds-class\"><span class=\"ds-dot\" aria-hidden=\"true\"></span>In class</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:4px;font-size:10px;line-height:1.5;font-weight:500;white-space:nowrap;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;}.ds-dot{width:5px;height:5px;background:currentColor;border-radius:50%;}.ds-free{background:var(--free-bg,#edf6ef);color:var(--free,#23714e);}.ds-class{background:var(--class-bg,#fcf4e5);color:var(--class,#946119);}@media(max-width:700px){.ds-badge{font-size:10px;}}"
+    },
+    {
+      "name": "Friend Card",
+      "kind": "card",
+      "refersTo": "friend-card",
+      "description": "Whole-card link with bilingual identity, explicit availability and a separated next-class row.",
+      "html": "<a href=\"#friend\" class=\"ds-card\"><div class=\"ds-card-top\"><span class=\"ds-avatar\" aria-hidden=\"true\">N</span><div class=\"ds-name\"><h2>Nok <span lang=\"th\">นก</span></h2><small>School of Engineering</small></div></div><div class=\"ds-body\"><span class=\"ds-status\">Free now</span><h3 class=\"ds-available\">A little time between classes</h3><div class=\"ds-meta\">Next class at 13:00</div></div><div class=\"ds-bottom\">Next · Computer Networks</div></a>",
+      "css": ".ds-card{display:flex;flex-direction:column;border:1px solid var(--border,#e5e7e2);border-radius:12px;padding:22px 22px 15px;min-width:0;background:var(--background,#ffffff);color:var(--foreground,#202321);text-decoration:none;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;}.ds-card:hover{border-color:#aab4a3;background:#fdfefb;}.ds-card:focus-visible{outline:2px solid var(--focus,#526653);outline-offset:4px;}.ds-card-top{display:flex;align-items:center;gap:11px;}.ds-avatar{display:inline-flex;width:42px;height:42px;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;font-size:18px;font-weight:500;line-height:1;background:#efeee7;color:#686855;}.ds-name h2{margin:0;font-size:14px;line-height:1.5;letter-spacing:-.01em;font-weight:600;}.ds-name h2 span{color:#69745f;font-size:11px;font-weight:400;margin-left:8px;}.ds-name small{font-size:10px;color:var(--muted,#687064);display:block;margin-top:1px;}.ds-body{padding:24px 0 18px;}.ds-status{display:inline-flex;padding:3px 7px;border-radius:4px;font-size:10px;line-height:1.5;font-weight:500;background:var(--free-bg,#edf6ef);color:var(--free,#23714e);}.ds-available{margin:11px 0 0;font-size:13px;line-height:1.6;font-weight:400;color:#545d4d;}.ds-meta{margin-top:7px;font-size:10px;color:var(--muted,#687064);}.ds-bottom{margin-top:auto;padding-top:14px;border-top:1px solid #eff0ec;font-size:10px;color:#6c7564;}@media(max-width:700px){.ds-card{padding:20px 20px 14px}.ds-name h2{font-size:15px}.ds-name small{font-size:11px}.ds-body{padding:21px 0 18px}.ds-available{font-size:14px}.ds-meta,.ds-bottom{font-size:11px}}@media(prefers-reduced-motion:reduce){.ds-card{transition:none;}}"
+    },
+    {
+      "name": "Status Filters",
+      "kind": "custom",
+      "refersTo": "filter-tabs",
+      "description": "Segmented availability filters: white selected segment and compact count tags.",
+      "html": "<div class=\"ds-filters\" role=\"group\" aria-label=\"Availability\"><button type=\"button\" aria-pressed=\"true\">All friends <span>50</span></button><button type=\"button\" aria-pressed=\"false\">Free now <span>32</span></button></div>",
+      "css": ".ds-filters{display:flex;padding:4px;background:var(--surface,#f8f9f7);border-radius:8px;gap:3px;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;}.ds-filters button{border:0;background:transparent;min-height:35px;padding:7px 12px;border-radius:5px;display:flex;gap:9px;align-items:center;font-family:inherit;font-size:12px;color:#60685c;white-space:nowrap;cursor:pointer;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;}.ds-filters button span{font-size:10px;background:#e9ece5;padding:0 5px;border-radius:4px;line-height:18px;min-width:19px;}.ds-filters button[aria-pressed=\"true\"]{background:var(--background,#ffffff);color:var(--foreground,#202321);box-shadow:0 1px 3px #20232112;}.ds-filters button[aria-pressed=\"true\"] span{background:#f0f2ed;}.ds-filters button:hover{color:var(--foreground,#202321);}.ds-filters button:focus-visible{outline:2px solid var(--focus,#526653);outline-offset:4px;}@media(max-width:700px){.ds-filters{gap:1px}.ds-filters button{min-height:44px;padding:6px 9px;gap:6px;flex:1;justify-content:center;font-size:11px}.ds-filters button span{font-size:9px;min-width:16px;padding:0 3px}}@media(prefers-reduced-motion:reduce){.ds-filters button{transition:none;}}"
+    },
+    {
+      "name": "Today Ribbon",
+      "kind": "custom",
+      "description": "Supplemental 08–18 timetable strip with actual interval proportions; sample classes and current marker.",
+      "html": "<div class=\"ds-ribbon\" aria-hidden=\"true\"><span>08</span><div class=\"ds-track\"><i style=\"left:10%;width:20%\"></i><i class=\"ds-ongoing\" style=\"left:50%;width:20%\"></i><b style=\"left:55%\"></b></div><span>18</span></div>",
+      "css": ".ds-ribbon{display:flex;align-items:center;gap:8px;margin-top:12px;color:#69745f;font-size:8px;font-family:\"Noto Sans Thai Variable\",\"Noto Sans Thai\",sans-serif;}.ds-track{position:relative;height:4px;background:#f0f2ec;flex:1;border-radius:2px;}.ds-track i{position:absolute;height:4px;background:#cbd1c4;border-radius:2px;}.ds-track i.ds-ongoing{background:#c59a51;}.ds-track b{position:absolute;top:-2px;width:1px;height:8px;background:#58634e;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A quiet place between classes",
+    "overview": "Koonpinai presents friends and their timetables with the restraint of a premium monochrome product. White space, ink typography and soft gray borders organize compact information; green and amber communicate availability. English and Thai share one self-hosted variable type family.\n\nThe interface feels calm while remaining useful at a glance. Larger screens expose a directory and weekly planning grid; phones give each friend a readable day agenda. Motion describes interaction state, with no entrance choreography. These rules describe the current implementation, rather than an unbuilt theme.",
+    "keyCharacteristics": [
+      "Monochrome structure with restrained semantic availability color.",
+      "One bilingual sans-serif family and tabular timetable numerals.",
+      "Flat bordered surfaces with gently rounded controls.",
+      "Three-to-one-column directory and a mobile day agenda.",
+      "Explicit labels, visible keyboard focus and reduced-motion support."
+    ],
+    "rules": [
+      {
+        "name": "The Status Has Words Rule",
+        "body": "Availability always has a text label; color and dots reinforce it rather than carrying the meaning alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Keep English and Thai in the same self-hosted family, and use weight, spacing and tabular numerals to clarify the information.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Use borders and tone for ordinary hierarchy; reserve cast shadows for selected segments and modal depth.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep white, ink and soft borders as the structural palette.",
+      "Do accompany semantic color with readable status text.",
+      "Do use the same self-hosted Noto Sans Thai family for English and Thai.",
+      "Do preserve the three/two/one-column directory and the day agenda at widths of 900px or less.",
+      "Do retain visible keyboard focus, tabular times and reduced-motion support."
+    ],
+    "donts": [
+      "Don't introduce saturated decorative accents or reinterpret course tints as availability colors.",
+      "Don't add page entrance choreography to the quiet product interface.",
+      "Don't add cast shadows to ordinary directory cards.",
+      "Don't use tiny timetable metadata sizes as the default for new body copy or controls.",
+      "Don't replace written availability labels with color-only dots."
+    ]
+  }
+}
