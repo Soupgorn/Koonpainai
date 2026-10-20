@@ -671,6 +671,17 @@ textarea {
 }
 .access-row > div {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.member-access-row .access-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
 }
 .access-row p {
   font-size: 12px;
@@ -1172,6 +1183,17 @@ textarea {
   }
   .access-row select {
     margin-left: 60px;
+  }
+  .member-access-row .access-actions {
+    flex-basis: 100%;
+  }
+  .member-access-row .access-actions label {
+    flex: 1;
+    min-width: 0;
+  }
+  .member-access-row select {
+    margin-left: 0;
+    width: 100%;
   }
   .mobile-review-tabs {
     display: flex;

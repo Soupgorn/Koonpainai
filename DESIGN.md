@@ -102,34 +102,34 @@ colors:
   dark-course-5-text: "#eccab0"
 typography:
   display:
-    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontFamily: 'Manrope, "Noto Sans Thai Variable", sans-serif'
     fontSize: "58px"
     fontWeight: 700
     lineHeight: 1.12
     letterSpacing: "-0.035em"
   headline:
-    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontFamily: 'Manrope, "Noto Sans Thai Variable", sans-serif'
     fontSize: "43px"
     fontWeight: 700
     lineHeight: 1.18
     letterSpacing: "-0.035em"
   title:
-    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontFamily: 'Manrope, "Noto Sans Thai Variable", sans-serif'
     fontSize: "22px"
     fontWeight: 700
     lineHeight: 1.35
     letterSpacing: "-0.02em"
   body:
-    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontFamily: 'Manrope, "Noto Sans Thai Variable", sans-serif'
     fontSize: "14px"
     lineHeight: 1.6
   label:
-    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontFamily: 'Manrope, "Noto Sans Thai Variable", sans-serif'
     fontSize: "13px"
     fontWeight: 650
     lineHeight: 1.5
   status:
-    fontFamily: "Manrope, \"Noto Sans Thai Variable\", sans-serif"
+    fontFamily: 'Manrope, "Noto Sans Thai Variable", sans-serif'
     fontSize: "11px"
     fontWeight: 650
     lineHeight: 1.5
@@ -283,7 +283,7 @@ The main desktop shell has a maximum width of (1328px), including (44px) horizon
 
 The directory leads with two-column free-person rows inside one flat bordered group; the list alternative uses one column. Each desktop row has (23px) padding. A compact in-class roster uses aligned identity, course/room, status and next-class columns with horizontal dividers. At (760px) or less, free rows become one column with (16px 14px) padding, roster headings disappear, and each roster entry exposes current course/room plus next-class time and name on separate lines. Preserve whole-row profile links and grouping rules.
 
-Mobile navigation is fixed to the bottom, reserves (78px) body space and includes safe-area padding. Desktop navigation stays in the header. The current route is visible in both. Personal strips and account entries appear only when the preview boundary permits them.
+Mobile navigation is fixed to the bottom, reserves (78px) body space and includes safe-area padding. Desktop navigation stays in the header. The current route is visible in both. Personal strips and account entries appear for authenticated members or an explicitly enabled fictional development preview.
 
 The friend timetable keeps the seven-day desktop grid, exact event positions and overlapping columns. At (900px) or less it switches to a day selector and agenda. The PDF workspace shows source and review side by side on desktop, stacks at tablet widths, and uses Source/Review panel controls at (760px) or less. Login and onboarding split narratives/forms on desktop and stack on phones.
 
@@ -305,7 +305,7 @@ Group and field boundaries are (1px). Ordinary controls use a (3px) primary-colo
 
 ### Buttons
 
-Primary actions use periwinkle with contrasting foreground, at least (44px) high, (9px 16px) padding and weight (650). Outline actions use a card surface and input border; ghost actions use transparent fill. Both hover to a surface tint. Destructive actions use semantic danger ink on the danger wash. Hover keeps that wash and changes both ink and border to `danger-hover`; it does not fill the button with the text color. Disabled buttons use opacity (0.45) with a not-allowed cursor. The SSO action keeps label-first row order and explains disconnected sign-in rather than implying an account is created.
+Primary actions use periwinkle with contrasting foreground, at least (44px) high, (9px 16px) padding and weight (650). Outline actions use a card surface and input border; ghost actions use transparent fill. Both hover to a surface tint. Destructive actions use semantic danger ink on the danger wash. Hover keeps that wash and changes both ink and border to `danger-hover`; it does not fill the button with the text color. Disabled buttons use opacity (0.45) with a not-allowed cursor. The SSO action keeps label-first row order and starts university sign-in when approved-client/session/database configuration is complete; otherwise it is disabled with an explanation.
 
 ### Inputs / Fields
 
@@ -331,7 +331,7 @@ Six subject pairs color events consistently in both themes. The current class ha
 
 Source preview preserves the PDF's actual colors on its canvas, with page/zoom controls and a keyboard-focusable source region. Review retains individual sessions, source references, editable fields, warnings and explicit confirmation before preview/export. Mobile Source/Review controls switch panels without inventing a separate content model.
 
-Account, policy, approval and access surfaces extend this vocabulary with honest temporary-state notices. Completed steps derive from the actual in-memory profile/policy state; approval and SSO remain disconnected. Interface appearance never implies data persistence or permission.
+Account, policy, approval and access surfaces preserve this vocabulary. Configured mode uses real server-validated profile/policy progress and pending/approved/suspended status. Profile and acknowledgement forms give pending, success and error feedback; local logout explicitly says that KMITL SSO may remain active. The header identity comes from the authenticated account. Account appearance uses the existing three choices without duplicating the header disclosure ID. Credential-free development previews retain explicit fictional notices, while temporary imports never imply publishing or persistence.
 
 ## Do's and Don'ts
 

@@ -1,26 +1,31 @@
 import { NextResponse, type NextRequest } from "next/server";
-
-// Preview switches are not authentication and never authorize future write APIs.
-export function proxy(request: NextRequest) {
-  const admin =
-    request.nextUrl.pathname === "/admin" ||
-    request.nextUrl.pathname.startsWith("/admin/");
-  const enabled =
-    process.env.NODE_ENV === "development" ||
-    (admin
-      ? process.env.ENABLE_ADMIN_DEMO === "true"
-      : process.env.ENABLE_UI_PREVIEW === "true");
-  // Rewrite before streaming: a layout's notFound() can otherwise retain HTTP 200.
-  if (!enabled) {
-    return NextResponse.rewrite(new URL("/_not-found", request.url), {
-      status: 404,
-    });
-  }
+import { getToken } from "next-auth/jwt";
+import { isFictionalPreview, readAuthSettings } from "./lib/auth/settings";
+/** Optimistic encrypted-cookie check only. DAL and every action recheck storage and approval. */
+export async function proxy(request: NextRequest) {
+  if (isFictionalPreview()) return NextResponse.next();
+  const settings = readAuthSettings();
+  const login = new URL("/login", settings?.origin ?? request.url);
+  if (!settings) return NextResponse.redirect(login);
+  const token = await getToken({
+    req: request,
+    secret: settings.secret,
+    secureCookie: new URL(settings.origin).protocol === "https:",
+  });
+  if (
+    !token ||
+    typeof token.userId !== "string" ||
+    typeof token.sid !== "string" ||
+    typeof token.deadline !== "number" ||
+    token.deadline <= Date.now() / 1000
+  )
+    return NextResponse.redirect(login);
   return NextResponse.next();
 }
-
 export const config = {
   matcher: [
+    "/",
+    "/friends/:path*",
     "/admin/:path*",
     "/onboarding/:path*",
     "/pending-approval",

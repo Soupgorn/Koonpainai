@@ -94,7 +94,9 @@ export function FriendProfile({
             Personal timetable preview.{" "}
             {sample
               ? "Fictional sample schedule."
-              : "Your reviewed import is held in memory."}{" "}
+              : friend.sessions.length
+                ? "Your reviewed import is held in memory."
+                : "No import has been added yet."}{" "}
             Nothing is saved or shared. Reloading resets this preview.
           </span>
         </p>

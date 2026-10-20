@@ -21,6 +21,7 @@ import { BrandMark } from "./site-header";
 import { usePersonalPreview } from "./personal-preview-provider";
 import { Button } from "./ui/button";
 import { StatusBadge } from "./shared";
+import { signInWithKmitl } from "@/lib/auth/actions";
 
 function PreviewNotice() {
   return (
@@ -59,7 +60,15 @@ function Steps({ step }: { step: number }) {
     </div>
   );
 }
-export function Login({ previewEnabled }: { previewEnabled: boolean }) {
+export function Login({
+  previewEnabled,
+  configured = false,
+  message = "",
+}: {
+  previewEnabled: boolean;
+  configured?: boolean;
+  message?: string;
+}) {
   const [notice, setNotice] = useState(false);
   return (
     <main id="main" className="login">
@@ -119,20 +128,41 @@ export function Login({ previewEnabled }: { previewEnabled: boolean }) {
           one timetable away.
         </h2>
         <p>
-          University sign-in is coming. Explore the interface while we connect
-          KMITL SSO.
+          {configured
+            ? "Sign in with your university account to get started."
+            : "University sign-in needs local client and account-storage configuration."}
         </p>
-        <Button className="sso" onClick={() => setNotice(true)}>
-          Continue with KMITL SSO
-          <ArrowRight size={18} />
-        </Button>
+        {configured ? (
+          <form action={signInWithKmitl}>
+            <Button className="sso" type="submit">
+              Continue with KMITL SSO
+              <ArrowRight size={18} />
+            </Button>
+          </form>
+        ) : (
+          <Button
+            className="sso"
+            disabled={!previewEnabled}
+            onClick={() => setNotice(true)}
+          >
+            Continue with KMITL SSO
+            <ArrowRight size={18} />
+          </Button>
+        )}
         <span className="sso-note">
-          SSO is not connected · No account will be created
+          {configured
+            ? "For the approved KMITL OIDC client"
+            : "SSO is not configured · No account will be created"}
         </span>
         {notice && (
           <p className="form-notice" role="status">
             University sign-in is not available yet. Your credentials have not
             been requested.
+          </p>
+        )}
+        {message && (
+          <p className="form-notice" role="status">
+            {message}
           </p>
         )}
         <div className="login-privacy">

@@ -37,12 +37,15 @@ export function Brand() {
 export function SiteHeader({
   showAdmin = false,
   showPreview = false,
+  viewer,
 }: {
   showAdmin?: boolean;
   showPreview?: boolean;
+  viewer?: { nickname: string };
 }) {
   const pathname = usePathname();
-  const { profile } = usePersonalPreview();
+  const { profile: previewProfile } = usePersonalPreview();
+  const profile = viewer ?? previewProfile;
   const entry = [
     "/login",
     "/onboarding",

@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
 import { FriendProfile } from "@/components/friend-profile";
-import { getFriend, getFriends } from "@/lib/friends-repository";
-export async function generateStaticParams() {
-  return (await getFriends()).map((f) => ({ id: f.id }));
-}
+import { getFriend } from "@/lib/friends-repository";
+export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,
 }: {

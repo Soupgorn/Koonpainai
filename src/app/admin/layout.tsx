@@ -1,15 +1,11 @@
-import { notFound } from "next/navigation";
+import { requireAdmin } from "@/lib/auth/access";
+import { isUiPreviewEnabled } from "@/lib/preview";
 export const dynamic = "force-dynamic";
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Only a browser-memory demonstration. A future API must authorize every write on the server.
-  if (
-    process.env.NODE_ENV !== "development" &&
-    process.env.ENABLE_ADMIN_DEMO !== "true"
-  )
-    notFound();
+  if (!isUiPreviewEnabled()) await requireAdmin();
   return children;
 }

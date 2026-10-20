@@ -2,38 +2,50 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { NextRequest } from "next/server";
 import { proxy } from "../src/proxy";
-
-function withFlags(
+import { isFictionalPreview, readAuthSettings } from "../src/lib/auth/settings";
+import { KMITL_ISSUER } from "../src/lib/auth/domain";
+async function withFlags(
   values: Record<string, string | undefined>,
-  check: () => void,
+  check: () => Promise<void> | void,
 ) {
   const before = Object.fromEntries(
-    Object.keys(values).map((key) => [key, process.env[key]]),
+    Object.keys(values).map((k) => [k, process.env[k]]),
   );
   try {
-    for (const [key, value] of Object.entries(values)) {
-      if (value === undefined) delete process.env[key];
-      else process.env[key] = value;
+    for (const [k, v] of Object.entries(values)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
     }
-    check();
+    await check();
   } finally {
-    for (const [key, value] of Object.entries(before)) {
-      if (value === undefined) delete process.env[key];
-      else process.env[key] = value;
+    for (const [k, v] of Object.entries(before)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
     }
   }
 }
 const response = (path: string) =>
-  proxy(new NextRequest(`http://localhost${path}`));
-test("production preview routes return 404 before rendering when no switches are enabled", () => {
-  withFlags(
+  proxy(new NextRequest(`http://localhost:3000${path}`));
+const unset = {
+  AUTH_SECRET: undefined,
+  AUTH_KEYCLOAK_ID: undefined,
+  AUTH_KEYCLOAK_SECRET: undefined,
+  DATABASE_URL: undefined,
+  AUTH_URL: undefined,
+  DIRECT_DATABASE_URL: undefined,
+};
+test("all timetable and account paths require login by default", async () => {
+  await withFlags(
     {
+      ...unset,
       NODE_ENV: "production",
-      ENABLE_ADMIN_DEMO: undefined,
-      ENABLE_UI_PREVIEW: undefined,
+      ENABLE_UI_PREVIEW: "true",
+      ENABLE_ADMIN_DEMO: "true",
     },
-    () => {
+    async () => {
       for (const path of [
+        "/",
+        "/friends/bean",
         "/admin",
         "/admin/import",
         "/admin/access",
@@ -44,50 +56,64 @@ test("production preview routes return 404 before rendering when no switches are
         "/my-timetable/import",
         "/account",
       ]) {
-        assert.equal(response(path).status, 404, path);
-        assert.ok(
-          response(path)
-            .headers.get("x-middleware-rewrite")
-            ?.endsWith("/_not-found"),
-        );
+        const r = await response(path);
+        assert.equal(r.status, 307, path);
+        assert.equal(new URL(r.headers.get("location")!).pathname, "/login");
       }
     },
   );
 });
-test("UI and administrator preview switches remain independent", () => {
-  withFlags(
-    {
-      NODE_ENV: "production",
-      ENABLE_ADMIN_DEMO: "false",
-      ENABLE_UI_PREVIEW: "true",
-    },
-    () => {
-      assert.equal(response("/my-timetable").status, 200);
-      assert.equal(response("/admin").status, 404);
+test("fictional UI requires explicit development opt-in and disappears with partial credentials", async () => {
+  await withFlags(
+    { ...unset, NODE_ENV: "development", ENABLE_UI_PREVIEW: undefined },
+    async () => {
+      assert.equal((await response("/")).status, 307);
     },
   );
-  withFlags(
-    {
-      NODE_ENV: "production",
-      ENABLE_ADMIN_DEMO: "true",
-      ENABLE_UI_PREVIEW: "false",
+  await withFlags(
+    { ...unset, NODE_ENV: "development", ENABLE_UI_PREVIEW: "true" },
+    async () => {
+      assert.ok(isFictionalPreview());
+      assert.equal((await response("/")).status, 200);
     },
-    () => {
-      assert.equal(response("/admin/import").status, 200);
-      assert.equal(response("/account").status, 404);
+  );
+  await withFlags(
+    {
+      ...unset,
+      NODE_ENV: "development",
+      ENABLE_UI_PREVIEW: "true",
+      AUTH_KEYCLOAK_ID: "fixture-client",
+    },
+    async () => {
+      assert.equal(isFictionalPreview(), false);
+      assert.equal((await response("/")).status, 307);
     },
   );
 });
-test("development exposes clearly labeled preview interfaces without granting real access", () => {
-  withFlags(
-    {
-      NODE_ENV: "development",
-      ENABLE_ADMIN_DEMO: undefined,
-      ENABLE_UI_PREVIEW: undefined,
-    },
-    () => {
-      assert.equal(response("/admin").status, 200);
-      assert.equal(response("/onboarding").status, 200);
-    },
+test("settings pin issuer, require high-entropy session material and a canonical HTTPS production origin", () => {
+  const env = {
+    NODE_ENV: "development",
+    AUTH_URL: "http://localhost:3000",
+    AUTH_SECRET: "fixture-session-secret-with-more-than-32-characters",
+    AUTH_KEYCLOAK_ID: "fixture-client",
+    AUTH_KEYCLOAK_SECRET: "fixture-secret",
+    DATABASE_URL: "postgres://fixture:fixture@localhost/fixture",
+  } as NodeJS.ProcessEnv;
+  assert.equal(readAuthSettings(env)?.issuer, KMITL_ISSUER);
+  for (const changes of [
+    { AUTH_SECRET: "short" },
+    { AUTH_KEYCLOAK_ISSUER: "https://untrusted.example" },
+    { AUTH_URL: "https://app.example/path" },
+    { AUTH_URL: "http://remote.example" },
+    { DATABASE_URL: "https://db.example" },
+    { NODE_ENV: "production" },
+  ] as Partial<NodeJS.ProcessEnv>[])
+    assert.equal(readAuthSettings({ ...env, ...changes }), null);
+  assert.ok(
+    readAuthSettings({
+      ...env,
+      NODE_ENV: "production",
+      AUTH_URL: "https://app.example",
+    }),
   );
 });

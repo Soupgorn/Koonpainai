@@ -21,27 +21,36 @@ type PreviewState = {
 const Context = createContext<PreviewState | null>(null);
 export function PersonalPreviewProvider({
   children,
+  initialProfile,
+  fictional = true,
 }: {
   children: React.ReactNode;
+  initialProfile?: PreviewProfile;
+  fictional?: boolean;
 }) {
-  const [profile, setProfile] = useState<PreviewProfile>({
-    nickname: "June",
-    thaiName: "จูน",
-    department: "Computer Engineering",
-  });
+  const [profile, setProfile] = useState<PreviewProfile>(
+    initialProfile ?? {
+      nickname: "June",
+      thaiName: "จูน",
+      department: "Computer Engineering",
+    },
+  );
   const [timetable, setTimetable] = useState<Friend>({
     ...friends[0],
     id: "my-preview",
     nickname: "June",
     thaiName: "จูน",
     initials: "J",
+    ...(!fictional
+      ? { id: "private-import-preview", sessions: [], published: false }
+      : {}),
   });
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [profileCompleted, setProfileCompleted] = useState(false);
   return (
     <Context.Provider
       value={{
-        profile,
+        profile: initialProfile ?? profile,
         setProfile,
         profileCompleted,
         setProfileCompleted,

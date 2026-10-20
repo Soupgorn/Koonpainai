@@ -2,7 +2,7 @@
 
 Find a break together.
 
-A Next.js application that calculates friends’ availability from class timetables in **Asia/Bangkok**. It includes a responsive public directory and a **real, browser-side KMITL timetable PDF importer**. Availability describes the timetable, not attendance or GPS location.
+A Next.js application that calculates friends’ availability from class timetables in **Asia/Bangkok**. It includes an approved-account directory, KMITL OIDC sign-in, PostgreSQL account storage, and a **real, browser-side KMITL timetable PDF importer**. Availability describes the timetable, not attendance or GPS location. Directory schedules are still fictional; imported schedules are temporary until explicitly exported.
 
 ## Run locally
 
@@ -10,10 +10,14 @@ Use **Node.js 22.13+ or Node.js 24+**, with npm. PDF.js 6 requires the newer Nod
 
 ```powershell
 npm ci
+npm run auth:check
+npm run db:migrate
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000), then [Admin Import](http://localhost:3000/admin/import). No database, API key, or account connection is needed for local processing.
+Configure the ignored `.env.local` using [.env.example](.env.example), then open [Login](http://localhost:3000/login). See [AUTH.md](AUTH.md) for approved-client settings, exact callback registration, database migration, admin bootstrap and the distinction between local logout and university SSO logout. New accounts must complete profile/policy steps and receive approval before shared timetable access.
+
+For fictional UI review without credentials, leave all auth/database values empty and explicitly set `ENABLE_UI_PREVIEW=true` in development. This never bypasses production authorization and disappears as soon as any real credential is configured. Browser-side PDF processing itself needs no external paid OCR service.
 
 `postinstall`, `predev`, and `prebuild` prepare the matching PDF.js worker, fonts, WASM files, Tesseract worker/core, and Thai/English language models in `public/vendor/`. These generated assets are ignored by Git. They are served by this app; OCR does not contact a paid service or CDN. Dependency installation requires npm network access; processing uses the installed, same-origin assets.
 
@@ -27,7 +31,7 @@ npm run build
 npm start
 ```
 
-Browser tests reuse a development server on port 3000 or start one. Stop a production server on that port before running them: production deliberately disables preview and admin routes by default. To run only the theme checks, use `npm run test:e2e -- tests/browser/themes.spec.ts`. These are rerun instructions, not a claim that checks passed on the current checkout.
+Browser regressions start an isolated fictional child server on port 3100 with separate `.next-e2e` output and no credentials. They leave the configured app on port 3000 intact. To run only theme checks, use `npm run test:e2e -- tests/browser/themes.spec.ts`. `npm run test:auth:e2e` separately exercises the configured development app using disposable database members and synthesized test sessions; it does not prove a real KMITL login succeeded. See [AUTH.md](AUTH.md) for opt-in real PostgreSQL tests and verification limits.
 
 ## Pages
 
@@ -35,18 +39,18 @@ Browser tests reuse a development server on port 3000 or start one. Stop a produ
 | --- | --- |
 | `/` | Twelve fictional friends; English/Thai nickname search, availability filters, two-column free-window rows/list alternative, and a ruled in-class roster |
 | `/friends/[id]` | Current availability, Monday–Sunday desktop timetable, mobile/tablet day agenda, exact class positions/overlaps, and class-detail dialogs |
-| `/login` | Public informational entry; KMITL SSO is disconnected and its button explains that no account is created |
-| `/onboarding` | In-memory fictional profile preview |
-| `/onboarding/policy` | Proposed sharing policy and in-memory acknowledgment |
-| `/pending-approval` | Approval preview; profile/policy completion reflects actual in-memory state and no approval request is submitted |
+| `/login` | Public entry; approved-client Auth.js/Keycloak sign-in when configured, disabled with an explanation otherwise |
+| `/onboarding` | Authenticated profile setup saved to PostgreSQL |
+| `/onboarding/policy` | Versioned sharing-policy acknowledgement saved to the account |
+| `/pending-approval` | Actual pending/suspended account status, rechecked on the server |
 | `/my-timetable` | Temporary personal timetable; can display a reviewed real import without publishing it |
 | `/my-timetable/import` | Real browser-side PDF importer reused for the temporary personal timetable |
-| `/account` | In-memory profile settings, appearance, and proposed sharing/access information |
+| `/account` | Persistent profile settings, local appearance preference, policy review and application logout |
 | `/admin` | Temporary friend management; changes reset on reload and do not update the public directory |
-| `/admin/access` | Fictional Pending/Approved/Suspended access records; changing them grants no access and sends no request |
+| `/admin/access` | Admin-only persistent Pending/Approved/Suspended account management |
 | `/admin/import` | Real PDF selection, text/OCR extraction, source preview, editable review, validation, private timetable/profile preview, and JSON export |
 
-The onboarding, policy, pending-approval, personal-timetable/import and account routes are server-guarded previews: available in development or with `ENABLE_UI_PREVIEW=true`; otherwise they return 404. The public login page only exposes preview links when that guard is enabled. All `/admin` routes use the separate development/`ENABLE_ADMIN_DEMO=true` guard. Neither flag is authentication.
+Shared directory/profile and personal timetable/import routes require an active application session, completed profile, current policy acknowledgement and approval. Admin routes additionally require an admin role. Pending members can still edit their account/profile and acknowledge policy. Server-side reads and actions enforce these checks independently of the optimistic proxy. The explicit credential-free development preview retains the old fictional flow; no flag bypasses configured or production access checks. Friend/schedule management remains a labeled temporary demo even for authenticated admins; only account/access data persists.
 
 The public directory still contains twelve explicitly fictional friends. “Try a class-time preview” switches the app clock to Tuesday 20 October 2026 at 10:30 Bangkok time. The preview is labeled above the directory and can be switched back to the live clock. Imported timetable preview also discloses the selected clock; it does not label imported data as fictional.
 
@@ -63,7 +67,7 @@ Keyboard focus, written status labels, native labeled forms, Radix dialogs, a sk
 ## Import a real KMITL timetable
 
 1. Export your timetable as a PDF, normally the visual weekly grid followed by detailed course records.
-2. Open `/admin/import`, select or drop **one PDF**, and choose **Read timetable**.
+2. As an approved member, open `/my-timetable/import` (or `/admin/import` as an admin), select or drop **one PDF**, and choose **Read timetable**.
 3. The app checks each page independently. Usable embedded text is read directly; image-only or insufficient-text pages run Thai and English OCR. Mixed documents are supported.
 4. Compare the original PDF with each extracted session. Use the page controls, zoom, or a session’s page reference. On tablet widths the source and editor stack vertically; at mobile widths use Source/Review controls to switch panels.
 5. Enter your chosen nickname and the **actual academic start/end dates**. The document’s creation date is never treated as the semester start.
@@ -159,19 +163,21 @@ See [UI_AUDIT.md](UI_AUDIT.md) for the UI review and refinements, [DESIGN.md](DE
 - The visual grid does not supply trustworthy exact times when the detailed page is absent. It is used for coverage warnings, not fabricated precision.
 - The schedule engine models recurring weekly classes within a term. Cancellations, holidays, exam exceptions, attendance, and physical location are not inferred.
 
-## Production and future persistence
+## Account persistence and production
 
 | Environment setting | Current behavior |
 | --- | --- |
-| `ENABLE_UI_PREVIEW=true` | Enables the server-guarded onboarding, policy, approval, personal timetable/import and account previews outside development |
-| `ENABLE_ADMIN_DEMO=true` | Enables the temporary `/admin`, `/admin/access` and `/admin/import` UI outside development |
+| `AUTH_URL`, `AUTH_SECRET`, `AUTH_KEYCLOAK_ID`, `AUTH_KEYCLOAK_SECRET` | Server-only Auth.js configuration; canonical HTTPS origin required in production |
+| `AUTH_KEYCLOAK_ISSUER` | Optional explicit value; must match the pinned official KMITL issuer |
+| `DATABASE_URL`, optional `DIRECT_DATABASE_URL` | PostgreSQL runtime and migration connections; never public variables |
+| `ENABLE_UI_PREVIEW=true` | Fictional development UI only when all real credentials are absent; never a production bypass |
 | `NEXT_PUBLIC_PDF_MAX_MB` | Public, build-time PDF size limit from 1 to 50 MiB; defaults to 10 MiB |
 | `KOONPINAI_TEST_PDF` | Optional local test input only; never a production setting or a committed private file |
 
-Production returns **404 by default** for preview and admin routes, with their navigation hidden. For an intentional local production preview, set the relevant flag before building and starting. The login information page remains public with disconnected SSO and no preview entry links by default. Preview flags never authorize a future server write API.
+Without a valid session, private pages redirect to `/login`; incomplete configuration leaves the SSO action disabled and auth endpoints fail closed. A partially configured installation never falls back to fictional access. The obsolete `ENABLE_ADMIN_DEMO` flag no longer grants access.
 
-The planned service flow is university sign-in, profile setup, sharing-policy acknowledgment, administrator approval, then authorized timetable sharing. Current screens demonstrate that flow only: no real SSO, Keycloak, PostgreSQL, Drizzle, write API, GitHub JSON storage or deployment is configured. Access management does not grant access. Policy and profile completion reflect local state, not a server record.
+Auth.js uses the official Keycloak provider with pinned OIDC discovery, Code Flow + PKCE S256/state/nonce, independently verified ID-token signatures, encrypted JWT application sessions and database revocation. Identity is the unique validated issuer/subject pair. First login creates a pending account; later logins reuse it. Profiles, versioned policy acknowledgement and access status persist through Drizzle/PostgreSQL. Local logout clears and revokes the application session; it does **not** terminate KMITL SSO. Full RP-Initiated Logout awaits verified client post-logout registration and token-hint requirements.
 
-Before production use, connect real authentication, approve accounts, enforce server authorization on every write, and implement an explicitly approved persistence/publish flow. The current async read boundary remains `src/lib/friends-repository.ts`; no storage adapter has been selected or implemented here. Confirm privacy/removal rules before replacing fictional records with approved schedules, retain deliberate review before sharing, and never upload original PDFs automatically. Additional KMITL export variants and timetable exceptions still need validation. Sample pages use `noindex` metadata.
+Live discovery and PostgreSQL connectivity/migration were verified locally. The real browser SSO attempt encountered **502 Bad Gateway on `sso.kmitl.ac.th`**; successful callback/token exchange and real-user creation remain unverified. Mock OIDC tests and synthesized-session browser tests are reported separately in [AUTH.md](AUTH.md). Before production, complete that live approved-client test, verify HTTPS/proxy/callback settings, bootstrap trusted administrators, review policy/privacy/removal rules and operate backups/rate limits/session cleanup. Timetable persistence/publishing, GitHub JSON storage and the KMITL timetable API remain separate future work. Original PDFs stay local. Pages use `noindex` metadata.
 
 No database credentials, API keys or GitHub access token are included. GitHub source-code publication is separate from publishing a user’s timetable data. This documentation update does not publish, commit, push or deploy the app.

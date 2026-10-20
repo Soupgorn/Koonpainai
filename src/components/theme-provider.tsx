@@ -18,6 +18,35 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 const subscribe = () => () => {};
+export function AppearanceSettings() {
+  const { theme, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
+  return (
+    <div className="appearance-options" role="group" aria-label="Appearance">
+      {(
+        [
+          ["light", "Light", Sun],
+          ["dark", "Dark", Moon],
+          ["system", "System", Monitor],
+        ] as const
+      ).map(([value, label, Icon]) => (
+        <button
+          key={value}
+          disabled={!mounted}
+          aria-pressed={mounted && theme === value}
+          onClick={() => setTheme(value)}
+        >
+          <Icon size={18} />
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
 export function ThemeControl() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(

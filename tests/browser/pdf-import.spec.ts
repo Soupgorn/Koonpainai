@@ -150,13 +150,14 @@ test("real embedded text extraction, editable review, private profile and canoni
 
 test("image-only Thai/English PDF actually runs local OCR with no external requests", async ({
   page,
+  baseURL,
 }) => {
   const paths: string[] = [],
     external: string[] = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
     paths.push(url.pathname);
-    if (/^https?:/.test(url.protocol) && url.origin !== "http://localhost:3000")
+    if (/^https?:/.test(url.protocol) && url.origin !== new URL(baseURL!).origin)
       external.push(url.origin);
   });
   await page.goto("/admin/import");

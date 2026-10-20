@@ -6,6 +6,7 @@ import "./redesign.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PersonalPreviewProvider } from "@/components/personal-preview-provider";
 import { isUiPreviewEnabled } from "@/lib/preview";
+import { currentMember } from "@/lib/auth/access";
 import { ClockProvider } from "@/components/clock-provider";
 import { SiteHeader } from "@/components/site-header";
 export const metadata: Metadata = {
@@ -17,24 +18,35 @@ export const metadata: Metadata = {
     "Find a little time together. See your friends’ class schedules and availability at a glance. คุณไปไหน",
   robots: { index: false, follow: false },
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const member = await currentMember(),
+    preview = isUiPreviewEnabled();
+  const profile = member
+    ? {
+        nickname: member.nickname || member.displayName,
+        thaiName: member.thaiName,
+        department: member.department,
+      }
+    : undefined;
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          <PersonalPreviewProvider>
+          <PersonalPreviewProvider
+            key={member ? member.id : "fictional"}
+            initialProfile={profile}
+            fictional={preview}
+          >
             <ClockProvider>
               <a className="skip-link" href="#main">
                 Skip to content
               </a>
               <SiteHeader
-                showPreview={isUiPreviewEnabled()}
-                showAdmin={
-                  process.env.NODE_ENV === "development" ||
-                  process.env.ENABLE_ADMIN_DEMO === "true"
-                }
+                showPreview={preview || !!member}
+                showAdmin={preview || member?.role === "admin"}
+                viewer={profile}
               />
               {children}
               <footer className="site-footer">
