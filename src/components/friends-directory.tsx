@@ -1,11 +1,10 @@
 "use client";
-import { useMemo, useState } from "react";
+import { startTransition, useMemo, useState, ViewTransition } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
   ChevronRight,
-  Clock3,
   LayoutGrid,
   List,
   Search,
@@ -20,12 +19,13 @@ import { usePersonalPreview } from "./personal-preview-provider";
 import {
   Avatar,
   DateDisplay,
-  PreviewControl,
   Room,
   StatusBadge,
 } from "./shared";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { useMotionAllowed } from "@/hooks/use-motion-allowed";
+import { BrandMark } from "./brand";
 
 type Entry = { friend: Friend; status: Availability };
 function FreePerson({ friend, status, now }: Entry & { now: Date }) {
@@ -38,7 +38,7 @@ function FreePerson({ friend, status, now }: Entry & { now: Date }) {
     : "Rest of today";
   return (
     <Link href={`/friends/${friend.id}`} className="friend-card free-person">
-      <Avatar friend={friend} />
+      <Avatar friend={friend} transition />
       <div className="person-name">
         <strong>
           {friend.nickname}
@@ -63,7 +63,7 @@ function ClassRow({ friend, status, now }: Entry & { now: Date }) {
   return (
     <Link href={`/friends/${friend.id}`} className="friend-card class-row">
       <div className="identity">
-        <Avatar friend={friend} />
+        <Avatar friend={friend} transition />
         <div>
           <strong>
             {friend.nickname}
@@ -118,6 +118,7 @@ export function FriendsDirectory({
   showPersonal?: boolean;
 }) {
   const { now } = useClock();
+  const motionAllowed = useMotionAllowed();
   const { timetable } = usePersonalPreview();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -154,18 +155,15 @@ export function FriendsDirectory({
   const personal = now ? getAvailability(timetable, now) : null;
   return (
     <main id="main" className="main-container dashboard">
-      <section className="page-heading">
-        <div>
-          <h1>Find a break together.</h1>
-          <p>From weekly timetables. Plans may differ.</p>
-        </div>
+      <section className="workspace-heading">
+        <h1>Friends</h1>
         <DateDisplay />
       </section>
       {showPersonal && personal?.next && (
         <aside className="own-strip">
           <CalendarDays className="own-icon" size={24} />
           <div>
-            <span className="small-label">Your next class · preview</span>
+            <span className="small-label">Your next class</span>
             <strong>{fixtureLabel(personal.next.session.name)}</strong>
           </div>
           <div className="own-time">
@@ -184,14 +182,16 @@ export function FriendsDirectory({
           </Link>
         </aside>
       )}
-      <PreviewControl />
       <section aria-label="Friends directory">
         <div className="toolbar">
           <div className="search">
             <Search size={19} />
             <Input
               aria-label="Search friends by nickname"
-              placeholder="Find someone by nickname"
+              name="friend-search"
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="Find a nickname, e.g. Mild…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -218,7 +218,7 @@ export function FriendsDirectory({
               <button
                 key={value}
                 aria-pressed={filter === value}
-                onClick={() => setFilter(String(value))}
+                onClick={() => startTransition(() => setFilter(String(value)))}
               >
                 {label}
                 <span>{now ? count : "–"}</span>
@@ -233,14 +233,14 @@ export function FriendsDirectory({
             <button
               aria-label="Grid view"
               aria-pressed={view === "grid"}
-              onClick={() => setView("grid")}
+              onClick={() => startTransition(() => setView("grid"))}
             >
               <LayoutGrid size={16} />
             </button>
             <button
               aria-label="List view"
               aria-pressed={view === "list"}
-              onClick={() => setView("list")}
+              onClick={() => startTransition(() => setView("list"))}
             >
               <List size={17} />
             </button>
@@ -252,7 +252,7 @@ export function FriendsDirectory({
           </p>
         )}
         {!now ? (
-          <div className="friend-grid" aria-label="Loading availability">
+          <div className="friend-grid directory-skeleton" aria-label="Loading availability" aria-busy="true">
             {Array.from({ length: 6 }, (_, i) => (
               <div className="friend-skeleton" key={i}>
                 <div />
@@ -260,6 +260,12 @@ export function FriendsDirectory({
                 <div />
               </div>
             ))}
+          </div>
+        ) : !friends.length ? (
+          <div className="directory-empty">
+            <BrandMark />
+            <h2>No shared timetables yet</h2>
+            <p>Friends will appear here when their timetables are available to share.</p>
           </div>
         ) : !shown.length ? (
           <div className="empty-state">
@@ -290,14 +296,13 @@ export function FriendsDirectory({
                   <h2 id="free-heading">
                     Free now <span>{available.length} friends</span>
                   </h2>
-                  <span className="subtle">
-                    Make the most of the time between classes.
-                  </span>
                 </div>
                 <div className="free-people">
-                  {available.map((e) => (
-                    <FreePerson key={e.friend.id} {...e} now={now} />
-                  ))}
+                  {available.map((e) => motionAllowed ? (
+                    <ViewTransition key={e.friend.id} update="directory-change">
+                      <FreePerson {...e} now={now} />
+                    </ViewTransition>
+                  ) : <FreePerson key={e.friend.id} {...e} now={now} />)}
                 </div>
               </section>
             )}
@@ -310,9 +315,6 @@ export function FriendsDirectory({
                   <h2 id="class-heading">
                     In class <span>{studying.length} friends</span>
                   </h2>
-                  <span className="subtle">
-                    From scheduled classes, not attendance.
-                  </span>
                 </div>
                 <div className="roster-head" aria-hidden="true">
                   <span>Friend</span>
@@ -322,9 +324,11 @@ export function FriendsDirectory({
                   <span />
                 </div>
                 <div className="class-roster">
-                  {studying.map((e) => (
-                    <ClassRow key={e.friend.id} {...e} now={now} />
-                  ))}
+                  {studying.map((e) => motionAllowed ? (
+                    <ViewTransition key={e.friend.id} update="directory-change">
+                      <ClassRow {...e} now={now} />
+                    </ViewTransition>
+                  ) : <ClassRow key={e.friend.id} {...e} now={now} />)}
                 </div>
               </section>
             )}
@@ -339,21 +343,17 @@ export function FriendsDirectory({
                   </h2>
                 </div>
                 <div className="class-roster">
-                  {other.map((e) => (
-                    <ClassRow key={e.friend.id} {...e} now={now} />
-                  ))}
+                  {other.map((e) => motionAllowed ? (
+                    <ViewTransition key={e.friend.id} update="directory-change">
+                      <ClassRow {...e} now={now} />
+                    </ViewTransition>
+                  ) : <ClassRow key={e.friend.id} {...e} now={now} />)}
                 </div>
               </section>
             )}
           </div>
         )}
       </section>
-      <aside className="schedule-note">
-        <Clock3 size={16} />
-        <span>
-          Timetable-based availability. Not live location or attendance.
-        </span>
-      </aside>
     </main>
   );
 }

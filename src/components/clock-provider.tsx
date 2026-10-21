@@ -2,12 +2,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 const ClockContext = createContext<{
   now: Date | null;
-  preview: boolean;
-  setPreview: (value: boolean) => void;
-}>({ now: null, preview: false, setPreview: () => {} });
+}>({ now: null });
 export function ClockProvider({ children }: { children: React.ReactNode }) {
   const [live, setLive] = useState<Date | null>(null);
-  const [preview, setPreview] = useState(false);
   useEffect(() => {
     const tick = () => setLive(new Date());
     tick();
@@ -19,9 +16,8 @@ export function ClockProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener("focus", onFocus);
     };
   }, []);
-  const now = preview ? new Date("2026-10-20T10:30:00+07:00") : live;
   return (
-    <ClockContext.Provider value={{ now, preview, setPreview }}>
+    <ClockContext.Provider value={{ now: live }}>
       {children}
     </ClockContext.Provider>
   );

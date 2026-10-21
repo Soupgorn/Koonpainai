@@ -1,17 +1,21 @@
 "use client";
-import { FlaskConical, MapPin } from "lucide-react";
-import { Button } from "./ui/button";
+import { MapPin } from "lucide-react";
 import type { AvailabilityKind, Friend } from "@/lib/types";
 import { statusLabel } from "@/lib/schedule";
 import { useClock } from "./clock-provider";
+import { ViewTransition } from "react";
+import { useMotionAllowed } from "@/hooks/use-motion-allowed";
 export function Avatar({
   friend,
   large = false,
+  transition = false,
 }: {
   friend: Friend;
   large?: boolean;
+  transition?: boolean;
 }) {
-  return (
+  const motionAllowed = useMotionAllowed();
+  const avatar = (
     <span
       className={`avatar avatar-${friend.avatar} ${large ? "avatar-large" : ""}`}
       aria-hidden="true"
@@ -19,6 +23,11 @@ export function Avatar({
       {friend.initials}
     </span>
   );
+  return transition && motionAllowed ? (
+    <ViewTransition name={`friend-${friend.id}`} share="friend-identity" default="none">
+      {avatar}
+    </ViewTransition>
+  ) : avatar;
 }
 export function StatusBadge({ kind }: { kind: AvailabilityKind }) {
   return (
@@ -34,27 +43,6 @@ export function Room({ children }: { children: React.ReactNode }) {
       <MapPin size={13} />
       {children}
     </span>
-  );
-}
-export function PreviewControl({ fictional = true }: { fictional?: boolean }) {
-  const { preview, setPreview } = useClock();
-  return (
-    <div className={`preview-control ${preview ? "preview-active" : ""}`}>
-      <FlaskConical size={14} />
-      <span>
-        {preview
-          ? "Time preview: Tue 20 Oct, 10:30"
-          : fictional
-            ? "Fictional friends. Real Bangkok time."
-            : "Private timetable preview. Bangkok time."}
-      </span>
-      {preview && fictional && (
-        <span className="preview-data-label">Fictional friends</span>
-      )}
-      <Button variant="ghost" size="sm" onClick={() => setPreview(!preview)}>
-        {preview ? "Return to live" : "Try a class-time preview"}
-      </Button>
-    </div>
   );
 }
 export function DateDisplay() {

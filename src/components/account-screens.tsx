@@ -17,24 +17,9 @@ import {
   Sun,
   Users,
 } from "lucide-react";
-import { BrandMark } from "./site-header";
 import { usePersonalPreview } from "./personal-preview-provider";
 import { Button } from "./ui/button";
-import { StatusBadge } from "./shared";
-import { signInWithKmitl } from "@/lib/auth/actions";
 
-function PreviewNotice() {
-  return (
-    <p className="preview-notice">
-      <Info size={16} />
-      <span>
-        <strong>Interface preview.</strong> No SSO session or account is
-        created. Profile, approval, and timetable changes stay in memory and
-        reset on reload.
-      </span>
-    </p>
-  );
-}
 function Steps({ step }: { step: number }) {
   const { profileCompleted, policyAccepted } = usePersonalPreview();
   const completed = [profileCompleted, policyAccepted, false];
@@ -58,133 +43,6 @@ function Steps({ step }: { step: number }) {
         </span>
       ))}
     </div>
-  );
-}
-export function Login({
-  previewEnabled,
-  configured = false,
-  message = "",
-}: {
-  previewEnabled: boolean;
-  configured?: boolean;
-  message?: string;
-}) {
-  const [notice, setNotice] = useState(false);
-  return (
-    <main id="main" className="login">
-      <section className="login-story">
-        <h1>
-          Same campus.
-          <br />
-          More time together.
-        </h1>
-        <p>
-          Know who has a break, what’s on their timetable, and when your
-          schedules line up.
-        </p>
-        <div className="login-demo" aria-label="Fictional timetable example">
-          <div className="demo-head">
-            <strong>A little window for lunch.</strong>
-            <span>Example · Tuesday, 11:45</span>
-          </div>
-          <div className="demo-person">
-            <span className="avatar">M</span>
-            <div>
-              <strong>
-                Mild <span lang="th">มายด์</span>
-              </strong>
-              <span>Free until 13:00</span>
-            </div>
-            <StatusBadge kind="free" />
-          </div>
-          <div className="demo-person">
-            <span className="avatar avatar-2">B</span>
-            <div>
-              <strong>
-                Bean <span lang="th">บีน</span>
-              </strong>
-              <span>Class finishes at 12:00</span>
-            </div>
-            <span className="starts-soon">Free in 15m</span>
-          </div>
-          <div className="shared-time">
-            <Clock3 size={20} />
-            <span>
-              A shared break<strong>12:00–13:00</strong>
-            </span>
-          </div>
-        </div>
-        <span className="story-note">
-          From class schedules. Never live location.
-        </span>
-      </section>
-      <section className="login-form">
-        <div className="entry-symbol">
-          <BrandMark />
-        </div>
-        <h2>
-          Your people,
-          <br />
-          one timetable away.
-        </h2>
-        <p>
-          {configured
-            ? "Sign in with your university account to get started."
-            : "University sign-in needs local client and account-storage configuration."}
-        </p>
-        {configured ? (
-          <form action={signInWithKmitl}>
-            <Button className="sso" type="submit">
-              Continue with KMITL SSO
-              <ArrowRight size={18} />
-            </Button>
-          </form>
-        ) : (
-          <Button
-            className="sso"
-            disabled={!previewEnabled}
-            onClick={() => setNotice(true)}
-          >
-            Continue with KMITL SSO
-            <ArrowRight size={18} />
-          </Button>
-        )}
-        <span className="sso-note">
-          {configured
-            ? "For the approved KMITL OIDC client"
-            : "SSO is not configured · No account will be created"}
-        </span>
-        {notice && (
-          <p className="form-notice" role="status">
-            University sign-in is not available yet. Your credentials have not
-            been requested.
-          </p>
-        )}
-        {message && (
-          <p className="form-notice" role="status">
-            {message}
-          </p>
-        )}
-        <div className="login-privacy">
-          <ShieldCheck size={22} />
-          <p>
-            The planned service shares your timetable with approved users after
-            you review the sharing policy.
-          </p>
-        </div>
-        {previewEnabled && (
-          <>
-            <Link className="quiet-link" href="/onboarding">
-              Explore the interface preview
-              <ArrowRight size={15} />
-            </Link>
-            <Link className="quiet-link" href="/onboarding/policy">
-              How timetable sharing will work
-            </Link>
-          </>
-        )}
-      </section>
-    </main>
   );
 }
 export function Onboarding() {
@@ -270,7 +128,6 @@ export function Onboarding() {
           Continue to sharing policy
           <ArrowRight size={17} />
         </Button>
-        <PreviewNotice />
       </form>
     </main>
   );
@@ -354,7 +211,6 @@ export function SharingPolicy() {
           <ArrowRight size={17} />
         </Button>
       </form>
-      <PreviewNotice />
     </main>
   );
 }
@@ -412,7 +268,6 @@ export function PendingApproval() {
       <Link className="quiet-link" href="/onboarding/policy">
         Review the sharing policy
       </Link>
-      <PreviewNotice />
     </main>
   );
 }
@@ -431,11 +286,9 @@ export function AccountSettings() {
     <main id="main" className="main-container account-settings">
       <div className="page-heading">
         <div>
-          <h1>Your account.</h1>
-          <p>A few details that make Koonpinai yours.</p>
+          <h1>Settings</h1>
         </div>
       </div>
-      <PreviewNotice />
       <section className="settings-section">
         <div>
           <h2>Your profile</h2>
@@ -520,7 +373,7 @@ export function AccountSettings() {
       <section className="settings-section">
         <div>
           <h2>Sharing & access</h2>
-          <p>Real accounts and approval are coming.</p>
+          <p>Review your sharing policy and access.</p>
         </div>
         <div>
           <p>

@@ -1,8 +1,6 @@
-# Koonpinai / คุณไปไหน
+# Koonpinai
 
-Find a break together.
-
-A Next.js application that calculates friends’ availability from class timetables in **Asia/Bangkok**. It includes an approved-account directory, KMITL OIDC sign-in, PostgreSQL account storage, and a **real, browser-side KMITL timetable PDF importer**. Availability describes the timetable, not attendance or GPS location. Directory schedules are still fictional; imported schedules are temporary until explicitly exported.
+A Next.js application that calculates friends’ availability from class timetables in **Asia/Bangkok**. It includes an approved-account directory, KMITL OIDC sign-in, PostgreSQL account storage, and a **real, browser-side KMITL timetable PDF importer**. Availability describes the timetable, not attendance or GPS location. Configured users see an empty Friends workspace until a real shared-timetable adapter is implemented. Fixture friends exist only in explicit credential-free development mode; imported schedules remain temporary and can be explicitly exported.
 
 ## Run locally
 
@@ -37,7 +35,7 @@ Browser regressions start an isolated fictional child server on port 3100 with s
 
 | Route | Functionality |
 | --- | --- |
-| `/` | Twelve fictional friends; English/Thai nickname search, availability filters, two-column free-window rows/list alternative, and a ruled in-class roster |
+| `/` | Authorized Friends workspace; honest empty state for configured users, development-only fixture rows, nickname search and availability filters |
 | `/friends/[id]` | Current availability, Monday–Sunday desktop timetable, mobile/tablet day agenda, exact class positions/overlaps, and class-detail dialogs |
 | `/login` | Public entry; approved-client Auth.js/Keycloak sign-in when configured, disabled with an explanation otherwise |
 | `/onboarding` | Authenticated profile setup saved to PostgreSQL |
@@ -50,19 +48,27 @@ Browser regressions start an isolated fictional child server on port 3100 with s
 | `/admin/access` | Admin-only persistent Pending/Approved/Suspended account management |
 | `/admin/import` | Real PDF selection, text/OCR extraction, source preview, editable review, validation, private timetable/profile preview, and JSON export |
 
-Shared directory/profile and personal timetable/import routes require an active application session, completed profile, current policy acknowledgement and approval. Admin routes additionally require an admin role. Pending members can still edit their account/profile and acknowledge policy. Server-side reads and actions enforce these checks independently of the optimistic proxy. The explicit credential-free development preview retains the old fictional flow; no flag bypasses configured or production access checks. Friend/schedule management remains a labeled temporary demo even for authenticated admins; only account/access data persists.
+Shared directory/profile and personal timetable/import routes require an active application session, completed profile, current policy acknowledgement and approval. Admin routes additionally require an admin role. Pending members can still edit their account/profile and acknowledge policy. Server-side reads and actions enforce these checks independently of the optimistic proxy. Only the explicit credential-free development preview exposes fixture friends; no flag bypasses configured or production access checks. Friend/schedule demo management appears only in the development preview. Configured administrators see the shared-timetable empty state and retain real account/access management; only account/access data persists.
 
-The public directory still contains twelve explicitly fictional friends. “Try a class-time preview” switches the app clock to Tuesday 20 October 2026 at 10:30 Bangkok time. The preview is labeled above the directory and can be switched back to the live clock. Imported timetable preview also discloses the selected clock; it does not label imported data as fictional.
+The server-only friends repository returns fixture records only when the explicit credential-free development preview is enabled; configured users see **No shared timetables yet**. No real shared-timetable adapter exists. The development sample badge appears only in that mode. **My Timetable always starts empty**, including development preview; a reviewed real import can populate its temporary in-memory state. The live Asia/Bangkok clock remains, while the former preview-time control and fixed fictional clock are removed.
 
 ## Interface and appearance
 
-The approved **Contemporary Social Utility (Concept C)** composition puts free-window length first, followed by current course/room and next-class details. The geometric K wordmark, self-hosted Manrope with Noto Sans Thai fallback, near-white canvas, flat white surfaces, periwinkle actions and navy text replace the earlier Blue Mist treatment. Green availability and amber class states remain separate from six stable course-color identities. English is the interface language; Thai branding and names are supported.
+The approved **Cloud & Sky** system now applies across every existing route. Mali supplies headings and Kodchasan supplies body/UI and timetable data, loaded once in the root layout through `next/font/google` with Thai/Latin subsets and existing Noto Sans Thai fallback coverage. The shadcn preset `b3FNbq6SRM` remains the Nova/Radix component foundation; the final global palette, fonts and penguin identity replace its earlier appearance. No dependencies were added for the migration.
 
-Desktop uses two-column free-person rows and a ruled in-class roster. At 760px or less, the directory becomes one column and navigation moves to a fixed bottom bar; next-class time and course name remain visible. At 900px or less, weekly timetables switch to a day agenda. Mobile PDF review has Source/Review controls; desktop shows both panels. The original PDF retains its source colors in either theme.
+Light mode uses canvas `#F5F8FE`, white cards, navy ink `#1E2A44`, brand blue `#3E79C8` and soft blue `#E5EFFB`. Primary actions use `#326DB5` with white text (5.26:1), hovering to `#285B9B`. Dark mode derives navy canvas `#101C2E`, cards `#182941`, light ink `#EDF5FF` and readable blue links `#9CC9FF`. Green availability and amber class states remain distinct from six stable course-color identities. Shared controls use a 14px base radius, light rules and restrained elevation.
 
-Light, Dark and System appearance use `next-themes`. The default follows the operating system. The header Sun/Moon toggle and preference disclosure each have a 44px target; the disclosure offers labeled Light/Dark/System radio choices. Account preview offers the same preferences. Only this visual preference persists in local storage, under `koonpinai-theme`. A pre-hydration theme script, root hydration-warning suppression and mount-aware controls handle initial theme resolution.
+The exact official name is **Koonpinai**. Reusable `BrandMark`, `BrandLogo` and `AppIcon` components use the approved pastel-blue peeking penguin. Its hand-traced true-vector master is `public/brand/koonpinai-mark.svg`; horizontal static wordmarks use outlined Kodchasan lettering, while the UI name stays accessible live text. `node scripts/generate-brand.mjs` reproduces the seventeen SVG/PNG assets and four ICO frames from the same master using the existing canvas dependency. See [brand asset documentation](public/brand/README.md) and [provenance](public/brand/provenance.json). Internal OAuth/database/storage/environment identifiers remain compatible.
 
-Keyboard focus, written status labels, native labeled forms, Radix dialogs, a skip link and reduced-motion behavior are part of the interface. Contrast targets are 4.5:1 for normal text, 3:1 for large text, and discernible input/focus boundaries. Source tokens are in `src/app/redesign.css`, the approved composition is in `src/app/approved-design.css`, and importer/admin/shared styles remain in `src/app/globals.css`; the root layout loads globals, approved composition, then redesign overrides. See [DESIGN.md](DESIGN.md) for the implemented system.
+The root metadata uses default title **Koonpinai**, page template **%s | Koonpinai**, the generated favicon and Apple touch icon. There is no existing manifest, PWA subsystem or public social-sharing metadata; exported icons do not imply installability.
+
+The compact penguin navbar and 1160px desktop working area frame search, filters and available schedule data. At 760px or less, free-person rows become one column and navigation moves to the bottom bar; current/next-class lines and account-access controls remain readable. At 900px or less, weekly timetables become a day agenda. Mobile PDF review offers Source/Review controls; desktop shows both panels. Source PDFs retain their original colors. Decorative footer, promotional slogans and preview-time controls are removed from actual rendering.
+
+Login preserves the centered single-card composition, fluid up to 420px, with safe-area padding and no application navigation, footer, demonstration panel or preview links. It uses the same Cloud & Sky/Mali/Kodchasan system, pinned to light appearance under either OS theme. The penguin and **Koonpinai** wordmark accompany **เวลาว่างตรงกัน** / **เจอกันง่ายขึ้น** and **เช็กตารางเรียน หาเวลาว่างของเพื่อน** / **แล้วนัดเจอกันได้ง่ายกว่าเดิม**. **Continue with KMITL SSO** submits the original action; unavailable, error and pending states remain honest, with duplicate submissions disabled and **Connecting to KMITL…** announced. Existing authentication/session/security behavior is preserved.
+
+Other routes retain Light/Dark/System through `next-themes`, OS default, 44px header targets and the existing `koonpinai-theme` preference key. Login does not change that preference. Keyboard focus, written statuses, native labeled forms, Radix dialogs and skip navigation remain. Native person/directory transitions use `useMotionAllowed` to bypass participation for reduced motion; CSS removes remaining animations/transitions. Contrast targets remain 4.5:1 normal text, 3:1 large text and discernible control/focus boundaries.
+
+Shared primitives live in `src/app/globals.css`; semantic extensions and effective geometry live in `src/app/redesign.css`, layered after inherited `src/app/approved-design.css`. Login's light composition is in `src/app/login/login.css`. See [DESIGN.md](DESIGN.md) for current tokens and component rules. Final verification results are reported separately; this documentation does not assert test pass counts.
 
 ## Import a real KMITL timetable
 

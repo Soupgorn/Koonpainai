@@ -20,7 +20,7 @@ export function AccessManagement() {
       </Link>
       <div className="page-heading">
         <div>
-          <h1>A familiar, trusted circle.</h1>
+          <h1>Access management</h1>
           <p>Review access to shared timetables.</p>
         </div>
       </div>
@@ -31,11 +31,10 @@ export function AccessManagement() {
           Access management
         </Link>
       </nav>
-      <p className="preview-notice">
+      <p className="access-warning">
         <Info size={17} />
         <span>
-          Fictional access records. Changing a status only updates this screen;
-          it grants no access and sends no request.
+          Sample accounts. Status changes here grant no real access.
         </span>
       </p>
       <section aria-label="Account access" className="access-list">

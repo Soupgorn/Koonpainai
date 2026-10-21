@@ -1,0 +1,62 @@
+[
+  {
+    "antipattern": "design-system-radius",
+    "name": "Radius outside DESIGN.md",
+    "description": "A border-radius value is outside the DESIGN.md rounded scale. Use a documented radius token or update the design system if the new shape is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/home/stars/Koonpainai/src/app/login/login.css",
+    "line": 54,
+    "snippet": "border-radius: 24px is outside the DESIGN.md rounded scale",
+    "advisory": true,
+    "ignoreValue": "24px"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/home/stars/Koonpainai/src/app/login/login.css",
+    "line": 56,
+    "snippet": "Undocumented color #274f8410 is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "#274f8410"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/home/stars/Koonpainai/src/app/login/login.css",
+    "line": 65,
+    "snippet": "font-size: 16px is off the DESIGN.md type ramp",
+    "advisory": true,
+    "ignoreValue": "16px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/home/stars/Koonpainai/src/app/login/login.css",
+    "line": 75,
+    "snippet": "font-size: 34px is off the DESIGN.md type ramp",
+    "advisory": true,
+    "ignoreValue": "34px"
+  },
+  {
+    "antipattern": "design-system-radius",
+    "name": "Radius outside DESIGN.md",
+    "description": "A border-radius value is outside the DESIGN.md rounded scale. Use a documented radius token or update the design system if the new shape is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/home/stars/Koonpainai/src/app/login/login.css",
+    "line": 134,
+    "snippet": "border-radius: 22px is outside the DESIGN.md rounded scale",
+    "advisory": true,
+    "ignoreValue": "22px"
+  }
+]

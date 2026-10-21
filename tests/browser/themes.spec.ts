@@ -50,7 +50,6 @@ test("theme: system default, manual override, reload persistence, keyboard and r
   for (const path of [
     "/friends/bean",
     "/my-timetable",
-    "/login",
     "/onboarding",
     "/pending-approval",
     "/account",
@@ -105,15 +104,24 @@ test("redesigned routes: both themes, accessibility, responsive layout and scree
     ["approval", "/pending-approval"],
     ["account", "/account"],
     ["admin-access", "/admin/access"],
+    ["admin", "/admin"],
+    ["personal-import", "/my-timetable/import"],
+    ["not-found", "/not-a-page"],
   ]) {
     await page.goto(path);
     await page.evaluate(() => document.fonts.ready);
+    if (path !== "/login")
+      await expect(page.getByRole("button", { name: /Switch to (Light|Dark) Mode/ })).toBeEnabled();
     for (const mode of ["light", "dark"]) {
       const target =
         mode === "light" ? "Switch to Light Mode" : "Switch to Dark Mode";
-      if (await page.getByRole("button", { name: target, exact: true }).count())
-        await page.getByRole("button", { name: target, exact: true }).click();
-      await expect(page.locator("html")).toHaveClass(new RegExp(mode));
+      if (path !== "/login") {
+        if (await page.getByRole("button", { name: target, exact: true }).count())
+          await page.getByRole("button", { name: target, exact: true }).click();
+        await expect(page.locator("html")).toHaveClass(new RegExp(mode));
+      } else {
+        await expect(page.locator(".auth-card")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+      }
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,
@@ -170,12 +178,10 @@ test("account previews stay temporary and SSO never pretends to authenticate", a
     page.getByText("Sharing policy has not been acknowledged", { exact: true }),
   ).toBeVisible();
   await page.goto("/login");
-  await page.getByRole("button", { name: "Continue with KMITL SSO" }).click();
-  await expect(page.getByRole("status")).toContainText("not available yet");
+  await expect(page.getByRole("button", { name: "Continue with KMITL SSO" })).toBeDisabled();
+  await expect(page.getByRole("status")).toBeVisible();
   await expect(page).toHaveURL(/\/login$/);
-  await page
-    .getByRole("link", { name: "Explore the interface preview" })
-    .click();
+  await page.goto("/onboarding");
   await page.getByLabel("Nickname", { exact: true }).fill("Fictional June");
   await page
     .getByRole("button", { name: "Continue to sharing policy" })
@@ -267,10 +273,11 @@ test("personal import: real extracted data, dark review, temporary timetable and
     .getByRole("link", { name: "View My Timetable", exact: true })
     .click();
   await expect(page.locator("main")).toContainText(
-    "Your reviewed import is held in memory",
+    "Temporary import. Export a copy before leaving.",
   );
   await page.reload();
-  await expect(page.locator("main")).toContainText("Fictional sample schedule");
+  await expect(page.locator("main")).not.toContainText("Temporary import. Export a copy before leaving.");
+  await expect(page.locator(".fixture-badge")).toHaveText("Development sample");
 });
 
 test("destructive dialog hover remains readable in both themes", async ({

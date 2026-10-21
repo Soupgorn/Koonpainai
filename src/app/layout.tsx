@@ -8,14 +8,25 @@ import { PersonalPreviewProvider } from "@/components/personal-preview-provider"
 import { isUiPreviewEnabled } from "@/lib/preview";
 import { currentMember } from "@/lib/auth/access";
 import { ClockProvider } from "@/components/clock-provider";
-import { SiteHeader } from "@/components/site-header";
+import { SiteChrome } from "@/components/site-chrome";
+import { Kodchasan, Mali } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const mali = Mali({ subsets: ["thai", "latin"], weight: ["500", "600", "700"], display: "swap", variable: "--font-mali" });
+const kodchasan = Kodchasan({ subsets: ["thai", "latin"], weight: ["400", "500", "600", "700"], display: "swap", variable: "--font-kodchasan" });
+
 export const metadata: Metadata = {
   title: {
-    default: "Koonpinai — Where are your friends?",
-    template: "%s · Koonpinai",
+    default: "Koonpinai",
+    template: "%s | Koonpinai",
   },
   description:
-    "Find a little time together. See your friends’ class schedules and availability at a glance. คุณไปไหน",
+    "View shared timetables and find time to meet your friends.",
+  applicationName: "Koonpinai",
+  icons: {
+    icon: [{ url: "/favicon.ico", sizes: "any" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   robots: { index: false, follow: false },
 };
 export default async function RootLayout({
@@ -31,31 +42,25 @@ export default async function RootLayout({
       }
     : undefined;
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", mali.variable, kodchasan.variable)}>
       <body>
         <ThemeProvider>
           <PersonalPreviewProvider
             key={member ? member.id : "fictional"}
             initialProfile={profile}
-            fictional={preview}
           >
             <ClockProvider>
               <a className="skip-link" href="#main">
                 Skip to content
               </a>
-              <SiteHeader
+              <SiteChrome
                 showPreview={preview || !!member}
+                fictional={preview}
                 showAdmin={preview || member?.role === "admin"}
                 viewer={profile}
-              />
-              {children}
-              <footer className="site-footer">
-                <span>
-                  คุณไปไหน<span className="footer-separator">/</span>A little
-                  less asking. A little more together.
-                </span>
-                <span>Made for the time between classes.</span>
-              </footer>
+              >
+                {children}
+              </SiteChrome>
             </ClockProvider>
           </PersonalPreviewProvider>
         </ThemeProvider>

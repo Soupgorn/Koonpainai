@@ -1,0 +1,10 @@
+[
+  {
+    "file": "public/icons/favicon-16x16.png",
+    "transparentPixels": 188
+  },
+  {
+    "file": "public/icons/icon-maskable-512x512.png",
+    "transparentPixels": 0
+  }
+]

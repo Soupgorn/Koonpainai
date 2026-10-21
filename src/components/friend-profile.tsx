@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ArrowLeft, Clock3, Info, MapPin, Upload } from "lucide-react";
+import { ArrowLeft, Clock3, MapPin, Upload } from "lucide-react";
 import type { Friend } from "@/lib/types";
 import {
   getAvailability,
@@ -10,7 +10,7 @@ import {
 } from "@/lib/schedule";
 import { fixtureLabel } from "@/lib/display";
 import { useClock } from "./clock-provider";
-import { Avatar, DateDisplay, PreviewControl, StatusBadge } from "./shared";
+import { Avatar, DateDisplay, StatusBadge } from "./shared";
 import { WeeklyTimetable } from "./weekly-timetable";
 import { Button } from "./ui/button";
 export function FriendProfile({
@@ -58,7 +58,7 @@ export function FriendProfile({
         </Link>
       )}
       <section className="profile-hero">
-        {!personal && <Avatar friend={friend} large />}
+        {!personal && <Avatar friend={friend} large transition={!embedded} />}
         <div className="profile-title">
           <Heading>
             {personal ? (
@@ -70,11 +70,7 @@ export function FriendProfile({
               </>
             )}
           </Heading>
-          <p>
-            {personal
-              ? "Your week, with room for everything else."
-              : `${friend.department} · KMITL`}
-          </p>
+          {!personal && <p>{friend.department} · KMITL</p>}
         </div>
         {personal ? (
           <Button asChild>
@@ -87,21 +83,10 @@ export function FriendProfile({
           !embedded && <DateDisplay />
         )}
       </section>
-      {personal && (
-        <p className="preview-notice">
-          <Info size={16} />
-          <span>
-            Personal timetable preview.{" "}
-            {sample
-              ? "Fictional sample schedule."
-              : friend.sessions.length
-                ? "Your reviewed import is held in memory."
-                : "No import has been added yet."}{" "}
-            Nothing is saved or shared. Reloading resets this preview.
-          </span>
-        </p>
+      {personal && !sample && friend.sessions.length > 0 && (
+        <p className="import-retention">Temporary import. Export a copy before leaving.</p>
       )}
-      {status && now ? (
+      {friend.sessions.length > 0 && (status && now ? (
         <section className="schedule-summary" aria-label="Current availability">
           <div>
             <div className="status-title">
@@ -170,19 +155,20 @@ export function FriendProfile({
         </section>
       ) : (
         <div className="summary-skeleton" />
-      )}
+      ))}
       <section className="timetable-section">
         <div className="week-heading">
           <div>
             <h2>{personal ? "Your week" : `${friend.nickname}’s week`}</h2>
-            <p>
+            {friend.sessions.length > 0 && <p>
               {friend.semester.name} · {friend.semester.start} to{" "}
               {friend.semester.end}
-            </p>
+            </p>}
           </div>
           <span className="timezone-note">Weekly schedule · Bangkok time</span>
         </div>
         <WeeklyTimetable
+          personal={personal}
           friend={
             sample
               ? {
@@ -196,13 +182,7 @@ export function FriendProfile({
               : friend
           }
         />
-        <p className="schedule-note">
-          <Info size={16} />
-          Weekly classes repeat within the academic term. Classrooms may change;
-          check before making plans.
-        </p>
       </section>
-      <PreviewControl fictional={sample} />
     </Container>
   );
 }

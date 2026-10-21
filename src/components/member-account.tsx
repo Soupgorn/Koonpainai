@@ -313,8 +313,7 @@ export function MemberAccount({ member }: { member: MemberView }) {
     <main id="main" className="main-container account-settings">
       <div className="page-heading">
         <div>
-          <h1>Your account.</h1>
-          <p>A few details that make Koonpinai yours.</p>
+          <h1>Settings</h1>
         </div>
       </div>
       <section className="settings-section">

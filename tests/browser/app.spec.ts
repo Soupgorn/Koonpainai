@@ -24,11 +24,11 @@ test("friends directory: live states, Thai search, empty results, filters and la
 }, info) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.clock.install({ time: new Date("2026-10-20T10:30:00+07:00") });
   await page.goto("/");
   await expect(page.locator(".friend-card")).toHaveCount(12);
   await capture(page, `${info.project.name}-live`);
-  await page.getByRole("button", { name: "Try a class-time preview" }).click();
-  await expect(page.getByText("Time preview: Tue 20 Oct, 10:30")).toBeVisible();
+
   await page.getByRole("button", { name: "In class", exact: false }).click();
   await expect(page.locator(".friend-card")).toHaveCount(6);
   await page.getByRole("button", { name: "Free now", exact: false }).click();
@@ -50,22 +50,12 @@ test("friends directory: live states, Thai search, empty results, filters and la
     await page.getByRole("button", { name: "List view" }).click();
     await expect(page.locator(".friend-list")).toBeVisible();
     await page.getByRole("button", { name: "Grid view" }).click();
+    await expect(page.locator(".directory-groups")).toBeVisible();
   }
   await capture(page, info.project.name);
   await noOverflow(page);
   await expect(page.locator(".date-display strong")).toContainText("10:30");
-  const previewBounds = await page.locator(".preview-active").boundingBox();
-  const firstFriendBounds = await page
-    .locator(".friend-card")
-    .first()
-    .boundingBox();
-  expect(previewBounds!.y).toBeGreaterThanOrEqual(0);
-  expect(previewBounds!.y + previewBounds!.height).toBeLessThan(
-    page.viewportSize()!.height,
-  );
-  expect(previewBounds!.y + previewBounds!.height).toBeLessThan(
-    firstFriendBounds!.y,
-  );
+  await expect(page.getByRole("button", { name: "Try a class-time preview" })).toHaveCount(0);
   const a11y = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
@@ -75,8 +65,8 @@ test("friends directory: live states, Thai search, empty results, filters and la
 test("profile has accurate status, accessible class details, responsive timetable and empty days", async ({
   page,
 }, info) => {
+  await page.clock.install({ time: new Date("2026-10-20T10:30:00+07:00") });
   await page.goto("/");
-  await page.getByRole("button", { name: "Try a class-time preview" }).click();
   await page.locator('a[href="/friends/bean"]').click();
   await expect(
     page.getByRole("heading", { name: "In Discrete Mathematics" }),
@@ -107,7 +97,7 @@ test("profile has accurate status, accessible class details, responsive timetabl
   expect(a11y.violations).toEqual([]);
   await page.goto("/friends/peak");
   await expect(
-    page.getByRole("heading", { name: "A blank page for now." }),
+    page.getByRole("heading", { name: "No timetable yet" }),
   ).toBeVisible();
   await page.goto("/friends/does-not-exist");
   await expect(

@@ -1,6 +1,5 @@
 "use client";
 import { createContext, useContext, useState } from "react";
-import { friends } from "@/lib/data";
 import type { Friend } from "@/lib/types";
 
 type PreviewProfile = {
@@ -22,11 +21,9 @@ const Context = createContext<PreviewState | null>(null);
 export function PersonalPreviewProvider({
   children,
   initialProfile,
-  fictional = true,
 }: {
   children: React.ReactNode;
   initialProfile?: PreviewProfile;
-  fictional?: boolean;
 }) {
   const [profile, setProfile] = useState<PreviewProfile>(
     initialProfile ?? {
@@ -36,14 +33,15 @@ export function PersonalPreviewProvider({
     },
   );
   const [timetable, setTimetable] = useState<Friend>({
-    ...friends[0],
-    id: "my-preview",
-    nickname: "June",
-    thaiName: "จูน",
-    initials: "J",
-    ...(!fictional
-      ? { id: "private-import-preview", sessions: [], published: false }
-      : {}),
+    id: "private-import-preview",
+    nickname: initialProfile?.nickname ?? "June",
+    thaiName: initialProfile?.thaiName ?? "จูน",
+    department: initialProfile?.department ?? "",
+    initials: initialProfile?.nickname[0] ?? "J",
+    avatar: 0,
+    sessions: [],
+    published: false,
+    semester: { name: "", start: "", end: "" },
   });
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [profileCompleted, setProfileCompleted] = useState(false);

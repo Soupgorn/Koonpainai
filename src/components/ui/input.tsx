@@ -5,5 +5,5 @@ export function Input({
   type,
   ...props
 }: React.ComponentProps<"input">) {
-  return <input type={type} className={cn("input", className)} {...props} />;
+  return <input data-slot="input" type={type} className={cn("input", className)} {...props} />;
 }

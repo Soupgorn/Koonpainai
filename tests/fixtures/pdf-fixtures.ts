@@ -141,12 +141,17 @@ export async function scanPdfFixture({
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.scale(scale, scale);
   context.fillStyle = "black";
-  GlobalFonts.registerFromPath(
+  const latinFont = GlobalFonts.registerFromPath(
+    resolve("public/fonts/manrope.ttf"),
+    "FixtureLatin",
+  );
+  const thaiFont = GlobalFonts.registerFromPath(
     resolve(
       "node_modules/@fontsource-variable/noto-sans-thai/files/noto-sans-thai-thai-wght-normal.woff2",
     ),
     "FixtureThai",
   );
+  if (!latinFont || !thaiFont) throw new Error("Fixture fonts could not be loaded");
   const thaiDays: Record<string, string> = {
     Monday: "จันทร์",
     Tuesday: "อังคาร",
@@ -156,7 +161,7 @@ export async function scanPdfFixture({
   };
   for (const token of fixtureTokens()) {
     const isThai = thai && token.text in thaiDays;
-    context.font = isThai ? "8px FixtureThai" : "8px Arial";
+    context.font = isThai ? "500 8px FixtureThai" : "600 8px FixtureLatin";
     context.fillText(
       isThai ? thaiDays[token.text] : token.text,
       token.x,

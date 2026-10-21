@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { BookOpen, Coffee, MapPin } from "lucide-react";
 import type { ClassSession, Friend } from "@/lib/types";
 import {
@@ -12,6 +13,7 @@ import {
   placeOverlaps,
 } from "@/lib/schedule";
 import { useClock } from "./clock-provider";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,9 +23,11 @@ import {
 export function WeeklyTimetable({
   friend,
   compact = false,
+  personal = false,
 }: {
   friend: Friend;
   compact?: boolean;
+  personal?: boolean;
 }) {
   const { now } = useClock();
   const local = now ? localParts(now) : null;
@@ -50,11 +54,9 @@ export function WeeklyTimetable({
     return (
       <div className="empty-state timetable-empty">
         <BookOpen size={32} strokeWidth={1.4} />
-        <h3>A blank page for now.</h3>
-        <p>
-          Once a timetable is added, their classes and availability will appear
-          here.
-        </p>
+        <h3>No timetable yet</h3>
+        <p>{personal ? "Add your timetable to see your weekly classes." : "Classes and availability will appear when a timetable is shared."}</p>
+        {personal && <Button asChild><Link href="/my-timetable/import">Update timetable</Link></Button>}
       </div>
     );
   const agenda = daySessions(friend, day);

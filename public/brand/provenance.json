@@ -1,0 +1,50 @@
+{
+  "source": "User-approved pastel-blue peeking penguin, hand-traced as true vector paths.",
+  "reference_attachment": "codex-clipboard-07fb5a8f-7c9a-489e-90bf-a793551f615d.png",
+  "master": "public/brand/koonpinai-mark.svg",
+  "master_sha256": "caf56a57637e3a7c6530b5c487363a7b947df36cc8682369928c66ebc83bcf70",
+  "wordmark": "Outlined Kodchasan 600; exact Koonpinai name; accompanying SIL Open Font License.",
+  "generator": "node scripts/generate-brand.mjs",
+  "rasters": [
+    {
+      "file": "public/brand/koonpinai-app-icon-512.png",
+      "sha256": "4d723d85d37050c47068281c05fb3ee729b9207301d9ad13cf4da01ae99ce597"
+    },
+    {
+      "file": "public/icons/favicon-16x16.png",
+      "sha256": "9d42270889f5ba0564e39f05ad39c95828295da7cbc30a10d7ed1fda94b45fd9"
+    },
+    {
+      "file": "public/icons/favicon-32x32.png",
+      "sha256": "5e6f822c3a62cd8893030f7f58e3adf9b262be074d1981f7a4d98264d186d6bd"
+    },
+    {
+      "file": "public/icons/favicon-48x48.png",
+      "sha256": "b6350021a666eec24936a69b206142d7e464762e7253f0524af09f89cdb7aecd"
+    },
+    {
+      "file": "public/icons/favicon-64x64.png",
+      "sha256": "e279a116fdc9623e1416f8077467da451b2ba4cde9344678adfa054d14c27bfb"
+    },
+    {
+      "file": "public/icons/icon-192x192.png",
+      "sha256": "d9f513c0f76f066eb206f8683bf3ce9f83a1ff65fd76bca3f4b95b93a28e5a08"
+    },
+    {
+      "file": "public/icons/icon-512x512.png",
+      "sha256": "4d723d85d37050c47068281c05fb3ee729b9207301d9ad13cf4da01ae99ce597"
+    },
+    {
+      "file": "public/icons/icon-maskable-512x512.png",
+      "sha256": "c91de07b50d973595013dcaa0ddaaec937d0028330249d689a030bf60622b3b1"
+    },
+    {
+      "file": "public/apple-touch-icon.png",
+      "sha256": "8b005fb261a24455b71f00f7d6f436a2b350371605dfa758ed0d7b00462c5d0d"
+    },
+    {
+      "file": "public/favicon.ico",
+      "sha256": "a145b8fa1de0165916582c26fe8259754a8b765dead9703cb95e6cdc9c112134"
+    }
+  ]
+}

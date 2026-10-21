@@ -1,21 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-const css = readFileSync(
-  new URL("../src/app/redesign.css", import.meta.url),
-  "utf8",
-);
+const styles = ["globals.css", "redesign.css"].map((file) => readFileSync(new URL(`../src/app/${file}`, import.meta.url), "utf8")).join("\n");
 function tokens(selector: string) {
-  const block =
-    css.match(
-      new RegExp(`${selector.replace(".", "\\.")} \\{([^}]+)\\}`),
-    )?.[1] || "";
-  return Object.fromEntries(
-    [...block.matchAll(/--([\w-]+):\s*(#[\da-f]{6});/gi)].map((m) => [
-      m[1],
-      m[2],
-    ]),
-  );
+  const result: Record<string, string> = {};
+  for (const block of styles.matchAll(new RegExp(`${selector.replace(".", "\\.")} \\{([^}]+)\\}`, "g")))
+    for (const match of block[1].matchAll(/--([\w-]+):\s*([^;]+);/g)) result[match[1]] = match[2].trim();
+  for (const key of Object.keys(result)) {
+    const alias = result[key].match(/^var\(--([\w-]+)\)$/)?.[1];
+    if (alias) result[key] = result[alias];
+  }
+  return result;
 }
 function luminance(hex: string) {
   const c = hex
@@ -31,16 +26,12 @@ function contrast(a: string, b: string) {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }
 for (const selector of [":root", ".dark"])
-  test(`${selector} text and all six course identities meet AA contrast`, () => {
+  test(`${selector} product status text and all six course identities meet AA contrast`, () => {
     const t = tokens(selector);
     const pairs = [
-      ["foreground", "background"],
-      ["foreground", "card"],
-      ["muted", "background"],
-      ["muted", "card"],
-      ["muted", "surface"],
-      ["primary", "card"],
-      ["primary-foreground", "primary"],
+      ["link", "app-canvas"],
+      ["muted-foreground", "app-canvas"],
+      ["muted-foreground", "surface"],
       ["free", "free-bg"],
       ["class", "class-bg"],
       ["danger", "danger-bg"],
@@ -56,11 +47,11 @@ for (const selector of [":root", ".dark"])
         `${fg}/${bg}: ${contrast(t[fg], t[bg]).toFixed(2)}`,
       );
     assert.ok(
-      contrast(t["input-border"], t.card) >= 3,
+      contrast(t["input-border"], t["app-canvas"]) >= 3,
       "Input outlines remain discernible",
     );
     assert.ok(
-      contrast(t.focus, t.card) >= 3,
+      contrast(t.focus, t["app-canvas"]) >= 3,
       "Keyboard focus remains discernible",
     );
   });

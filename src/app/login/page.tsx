@@ -1,6 +1,11 @@
-import { Login } from "@/components/account-screens";
-import { isUiPreviewEnabled } from "@/lib/preview";
+import type { Metadata } from "next";
+import { BrandLogo } from "@/components/brand";
+import { LoginSubmit } from "@/components/login-submit";
+import { signInWithKmitl } from "@/lib/auth/actions";
 import { readAuthSettings } from "@/lib/auth/settings";
+import "./login.css";
+
+export const metadata: Metadata = { title: "Sign in" };
 export const dynamic = "force-dynamic";
 export default async function Page({
   searchParams,
@@ -8,17 +13,29 @@ export default async function Page({
   searchParams: Promise<{ error?: string; signedOut?: string }>;
 }) {
   const query = await searchParams;
-  const message =
-    query.signedOut === "local"
-      ? "You’re signed out of Koonpinai. Your KMITL SSO session may still be active."
-      : query.error
-        ? "Sign-in could not be completed. Try again, or ask your administrator to check the approved client and account storage."
-        : "";
+  const configured = !!readAuthSettings();
   return (
-    <Login
-      previewEnabled={isUiPreviewEnabled()}
-      configured={!!readAuthSettings()}
-      message={message}
-    />
+    <main id="main" className="auth-page">
+      <section className="auth-card" aria-labelledby="login-heading" lang="th">
+        <div className="auth-brand"><BrandLogo /></div>
+        <h1 id="login-heading">เวลาว่างตรงกัน<br />เจอกันง่ายขึ้น</h1>
+        <p className="auth-description">
+          เช็กตารางเรียน หาเวลาว่างของเพื่อน<br />
+          แล้วนัดเจอกันได้ง่ายกว่าเดิม
+        </p>
+        <form action={signInWithKmitl}>
+          <LoginSubmit configured={configured} />
+        </form>
+        {query.error ? (
+          <p className="auth-feedback" role="alert" lang="en">
+            Sign-in could not be completed. Please try again.
+          </p>
+        ) : !configured ? (
+          <p className="auth-feedback" role="status">
+            เข้าสู่ระบบยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง
+          </p>
+        ) : null}
+      </section>
+    </main>
   );
 }

@@ -17,12 +17,13 @@ export function DialogContent({
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="dialog-overlay" />
       <DialogPrimitive.Content
+        data-slot="dialog-content"
         className={cn("dialog-content", className)}
         {...props}
       >
         {children}
         <DialogPrimitive.Close className="dialog-x" aria-label="Close dialog">
-          <X size={18} />
+          <X size={18} aria-hidden="true" />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>

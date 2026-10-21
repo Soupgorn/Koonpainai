@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { AccessManagement } from "@/components/access-management";
 import { MemberAccessForm } from "@/components/member-account";
 import { isUiPreviewEnabled } from "@/lib/preview";
 import { requireAdmin } from "@/lib/auth/access";
 import { getMemberRepository } from "@/db";
+export const metadata: Metadata = { title: "Account access" };
 export default async function Page() {
   if (isUiPreviewEnabled()) return <AccessManagement />;
   const actor = await requireAdmin(),

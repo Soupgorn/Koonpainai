@@ -7,7 +7,7 @@ export default function Loading() {
       aria-busy="true"
     >
       <div className="page-skeleton" />
-      <div className="friend-grid">
+      <div className="friend-grid directory-skeleton">
         {Array.from({ length: 6 }, (_, i) => (
           <div className="friend-skeleton" key={i}>
             <div />

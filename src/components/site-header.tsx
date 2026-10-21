@@ -4,43 +4,23 @@ import { usePathname } from "next/navigation";
 import { CalendarDays, ChevronRight, UserRound, Users } from "lucide-react";
 import { ThemeControl } from "./theme-provider";
 import { usePersonalPreview } from "./personal-preview-provider";
-export function BrandMark() {
-  return (
-    <svg
-      className="brand-mark"
-      width="31"
-      height="31"
-      viewBox="0 0 32 32"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M7 7v18M13 7v18M24 7 14 16l10 9"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+import { BrandLogo } from "./brand";
 export function Brand() {
   return (
     <Link href="/" className="brand" aria-label="Koonpinai home">
-      <BrandMark />
-      <span>
-        koonpinai<small lang="th">คุณไปไหน</small>
-      </span>
+      <BrandLogo />
     </Link>
   );
 }
 export function SiteHeader({
   showAdmin = false,
   showPreview = false,
+  fictional = false,
   viewer,
 }: {
   showAdmin?: boolean;
   showPreview?: boolean;
+  fictional?: boolean;
   viewer?: { nickname: string };
 }) {
   const pathname = usePathname();
@@ -93,6 +73,7 @@ export function SiteHeader({
               <Link
                 href="/admin"
                 className={pathname.startsWith("/admin") ? "active" : ""}
+                aria-current={pathname.startsWith("/admin") ? "page" : undefined}
               >
                 Admin
               </Link>
@@ -100,9 +81,7 @@ export function SiteHeader({
           </nav>
         )}
         <div className="header-right">
-          <span className="community">
-            {entry ? "Where are your friends?" : "KMITL students"}
-          </span>
+          {fictional && <span className="fixture-badge">Development sample</span>}
           <ThemeControl />
           {!entry &&
             (showPreview ? (
