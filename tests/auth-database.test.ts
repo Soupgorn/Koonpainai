@@ -5,6 +5,8 @@ import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import { createMemberRepository } from "../src/db/member-repository";
+
+import { databaseConfig } from "../src/db/connection";
 import {
   KMITL_ISSUER,
   POLICY_VERSION,
@@ -23,10 +25,7 @@ test(
       process.env.DATABASE_URL,
       "Configure the ignored local database URL first",
     );
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      connectionTimeoutMillis: 5000,
-    });
+    const pool = new Pool(databaseConfig());
     try {
       await drizzle(pool).transaction(async (tx) => {
         const security = await tx.execute(

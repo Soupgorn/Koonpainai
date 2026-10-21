@@ -75,6 +75,10 @@ test("shared timetable access requires profile, current policy and fresh approve
     "policy",
   );
   assert.equal(memberGate({ ...member, role: "admin" }), "profile");
+  assert.equal(
+    memberGate({ ...policy, role: "admin", status: "approved", policyVersion: "obsolete" }),
+    "policy",
+  );
 });
 test("profile validation rejects missing/oversized values without accepting identity/role fields", () => {
   assert.equal(
@@ -91,8 +95,10 @@ test("profile validation rejects missing/oversized values without accepting iden
     department: "Engineering",
     subject: "forged",
     role: "admin",
+    status: "approved",
   });
   assert.equal(value.nickname, "Mild");
   assert.equal("role" in value, false);
+  assert.equal("status" in value, false);
   assert.equal("subject" in value, false);
 });

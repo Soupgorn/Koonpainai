@@ -1,0 +1,7 @@
+# Drizzle hashes raw SQL bytes. Keep migration checksums portable across OSes.
+drizzle/*.sql text eol=lf
+
+# Preserve reviewed legacy proposal bytes and portable rollback checksums.
+operations/runtime-role.PROPOSED.sql -text
+operations/retired-api-first-0002/* -text
+operations/student-timetables.rollback.PROPOSED.sql text eol=lf

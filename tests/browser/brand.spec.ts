@@ -22,7 +22,8 @@ test("official penguin branding, metadata and approved global fonts reach every 
     if (path === '/my-timetable') {
       await expect(page.getByRole('heading', { name: 'No timetable yet' })).toBeVisible();
       await expect(page.getByRole('region', { name: 'Current availability' })).toHaveCount(0);
-      await expect(page.getByRole('link', { name: 'Update timetable' }).first()).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Set semester', exact: true })).toBeEnabled();
+      await expect(page.getByRole('button', { name: 'Add class', exact: true })).toBeDisabled();
     }
   }
   for (const path of ['/favicon.ico','/apple-touch-icon.png','/brand/koonpinai-mark.svg','/brand/koonpinai-logo.svg','/brand/koonpinai-logo-light.svg','/brand/koonpinai-app-icon.svg','/icons/favicon-16x16.png','/icons/icon-192x192.png','/icons/icon-512x512.png','/icons/icon-maskable-512x512.png']) {

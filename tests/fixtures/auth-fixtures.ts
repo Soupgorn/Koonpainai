@@ -71,6 +71,7 @@ export class MemoryMembers implements MemberRepository {
 }
 export async function oidcFixture(
   fault?: "issuer" | "audience" | "signature" | "nonce" | "expiry" | "database",
+  extraClaims: Record<string, unknown> = {},
 ) {
   const { publicKey, privateKey } = await generateKeyPair("RS256");
   const publicJwk = {
@@ -124,6 +125,7 @@ export async function oidcFixture(
         throw new Error("Callback mismatch");
       pkceChecked = true;
       let idToken = await new SignJWT({
+        ...extraClaims,
         name: "Fictional Student",
         email: "fixture@example.invalid",
         email_verified: true,

@@ -10,6 +10,7 @@ import { mkdir } from "node:fs/promises";
 import { readAuthSettings } from "../../src/lib/auth/settings";
 import { createMemberRepository } from "../../src/db/member-repository";
 import { members } from "../../src/db/schema";
+import { databaseConfig } from "../../src/db/connection";
 import {
   KMITL_ISSUER,
   POLICY_VERSION,
@@ -77,10 +78,7 @@ test("synthesized session + real PostgreSQL: onboarding, approval, policy, profi
 }, info) => {
   // This verifies our application after authentication, not live KMITL login.
   // The test harness alone can issue this cookie using the ignored local secret.
-  const pool = new Pool({
-    connectionString: settings!.databaseUrl,
-    connectionTimeoutMillis: 5000,
-  });
+  const pool = new Pool(databaseConfig());
   const db = drizzle(pool),
     repository = createMemberRepository(db);
   const subject = "browser-fixture-" + randomUUID(),
@@ -189,14 +187,47 @@ test("synthesized session + real PostgreSQL: onboarding, approval, policy, profi
       .where(eq(members.id, id));
     await page.goto("/my-timetable");
     await expect(
-      page.getByText("No import has been added yet.", { exact: false }),
+      page.getByRole("heading", {
+        name: "No timetable available yet.",
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(page.locator(".timetable-event, .agenda-event")).toHaveCount(
       0,
     );
-    await page.goto("/friends/bean");
     await expect(
-      page.locator(".desktop-timetable:visible, .mobile-timetable:visible"),
+      page.getByRole("button", { name: "Refresh timetable", exact: true }),
+    ).toBeDisabled();
+    for (const mode of ["Light", "Dark"]) {
+      await page.getByRole("button", { name: "Theme preferences" }).click();
+      await page.getByRole("radio", { name: mode, exact: true }).check();
+      await page.keyboard.press("Escape");
+      expect(
+        (
+          await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+            .analyze()
+        ).violations,
+      ).toEqual([]);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: `.impeccable/review/oidc/api-unavailable-${info.project.name}-${mode.toLowerCase()}.png`,
+        fullPage: true,
+      });
+    }
+    await page.goto("/");
+    await expect(
+      page.locator('a.friend-card[href="/friends/' + id + '"]'),
+    ).toBeVisible();
+    await expect(page.locator(".friend-card.status-free")).toHaveCount(0);
+    expect(await page.content()).not.toContain(subject);
+    await page.goto("/friends/" + id);
+    await expect(
+      page.getByRole("heading", { name: "No timetable available yet." }),
     ).toBeVisible();
     await page.goto("/admin/access");
     await expect(

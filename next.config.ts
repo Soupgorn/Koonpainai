@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  output: "standalone",
+  generateBuildId: async () => process.env.KOONPINAI_BUILD_ID ?? null,
   devIndicators: false,
   // Callback query strings and Server Action arguments contain private data.
   logging: false,

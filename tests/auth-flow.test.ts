@@ -73,6 +73,29 @@ test("mocked OIDC code flow uses S256/state/nonce and persists/reuses the issuer
   assert.equal(f.repository.users.length, 1);
   assert.equal(f.repository.loginCalls, 2);
 });
+test("provider admin claims cannot promote a normal Koonpinai sign-in", async () => {
+  const f = await oidcFixture(undefined, {
+    role: "admin",
+    status: "approved",
+    realm_access: { roles: ["admin"] },
+    groups: ["admin"],
+  });
+  const received: Record<string, unknown>[] = [];
+  const login = f.repository.login.bind(f.repository);
+  f.repository.login = async (identity, sid, expiresAt) => {
+    received.push({ ...identity });
+    return login(identity, sid, expiresAt);
+  };
+  await f.begin();
+  await f.callback();
+  assert.equal(received.length, 1);
+  assert.deepEqual(Object.keys(received[0]).sort(), [
+    "displayName", "email", "issuer", "subject",
+  ]);
+  assert.equal(f.repository.users[0].role, "member");
+  assert.equal(f.repository.users[0].status, "pending");
+});
+
 for (const fault of [
   "issuer",
   "audience",

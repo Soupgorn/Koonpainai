@@ -20,6 +20,7 @@ import {
 import { POLICY_VERSION } from "@/lib/auth/domain";
 import { Button } from "./ui/button";
 import { AppearanceSettings } from "./theme-provider";
+
 export type MemberView = {
   id: string;
   nickname: string;
@@ -151,8 +152,7 @@ export function MemberOnboarding({ member }: { member: MemberView }) {
         <div className="aside-reassurance">
           <ShieldCheck size={23} />
           <p>
-            Access to shared timetables requires your policy acknowledgement and
-            administrator approval.
+            Create and maintain your own weekly timetable. Only approved members who acknowledge the current sharing policy can see shared schedules.
           </p>
         </div>
       </aside>
@@ -199,21 +199,18 @@ export function MemberPolicy({ member }: { member: MemberView }) {
         <div>
           <ShieldCheck size={23} />
           <div>
-            <strong>Review before sharing</strong>
+            <strong>Your timetable, your changes</strong>
             <p>
-              Check imported records and academic dates before accepting them.
-              Importing or exporting a timetable does not publish it.
+              You add, edit and delete your own classes. Administrators manage account approval; they cannot edit your timetable through the application.
             </p>
           </div>
         </div>
         <div>
           <LockKeyhole size={23} />
           <div>
-            <strong>Your PDF stays on your device</strong>
+            <strong>Only the timetable details we need</strong>
             <p>
-              PDF reading and Thai/English OCR run in your browser. Your account
-              profile and this acknowledgement are stored on the server; the
-              original PDF is not uploaded.
+              Your profile, semester dates and class entries are stored in Koonpinai. Shared schedules are hidden if your account is pending or suspended, or your acknowledgement is out of date. Your university identity and email are not shown in the directory.
             </p>
           </div>
         </div>
@@ -329,6 +326,14 @@ export function MemberAccount({ member }: { member: MemberView }) {
           <p>Your preference is remembered on this device.</p>
         </div>
         <AppearanceSettings />
+      </section>
+      <section className="settings-section">
+        <div>
+          <h2>Your timetable</h2><p>You manage your own weekly classes.</p>
+        </div>
+        <div>
+          <p>Only you can change your classes. Approved members with current acknowledgement can view your saved timetable.</p><Link className="button button-outline" href="/my-timetable">Manage my timetable</Link>
+        </div>
       </section>
       <section className="settings-section">
         <div>

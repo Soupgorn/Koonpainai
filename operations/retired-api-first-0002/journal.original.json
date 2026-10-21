@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792522494659,
+      "tag": "0000_damp_nekra",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792523849679,
+      "tag": "0001_account_table_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792526829754,
+      "tag": "0002_api_first_metadata",
+      "breakpoints": true
+    }
+  ]
+}
