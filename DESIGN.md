@@ -311,7 +311,7 @@ Six retained course pairs distinguish subjects in either theme; they do not desc
 
 ### Neutral
 
-The canvas is `background`, with `app-canvas` resolving to it. `card` supplies content surfaces, `foreground` main ink, and `muted-foreground` supporting text. `muted` remains a surface role. Quiet `border` rules group content; `input-border` makes controls discernible. Dark mode derives navy canvas/card/surface roles with light ink and brighter links. Source PDFs retain original colors rather than inheriting the UI palette.
+The canvas is `background`, with `app-canvas` resolving to it. `card` supplies content surfaces, `foreground` main ink, and `muted-foreground` supporting text. `muted` remains a surface role. Quiet `border` rules group content; `input-border` makes controls discernible. Dark mode derives navy canvas/card/surface roles with light ink and brighter links. The owner editor inherits these same tokens in both themes.
 
 **The Single Identity Rule.** Use the approved peeking penguin and exact Koonpinai wordmark everywhere; never substitute the former K symbol or translate the official name.
 
@@ -349,7 +349,7 @@ Friends leads with a compact title/Bangkok clock, search and filters. When fixtu
 
 My Timetable begins empty for every session and offers **Update timetable**. An accepted real import replaces the in-memory schedule; reload resets it. Never fill missing classes or availability with fixtures. Weekly grids preserve exact times and overlaps; at (900px) they become a day agenda. Mobile bottom navigation reserves (78px) body space and includes safe-area padding. Account access rows use a mobile two-column grid with controls placed below identity content, allowing wrapping without clipping.
 
-PDF review is side by side on desktop, stacked at tablet widths and switched by Source/Review controls on mobile. Onboarding preserves its narrative/form composition. Login alone omits application navigation and uses a full-viewport centered grid, safe-area-aware minimum (24px) padding and a fluid card up to (420px). Card padding is (40px 36px), becoming (32px 24px) at (480px); narrow screens use (16px) page and (20px) card insets. No fixed card height prevents reaching content on short screens.
+The owner editor uses a focused, scrollable dialog with labeled paired fields and full-width mobile actions. Onboarding preserves its narrative/form composition. Login alone omits application navigation and uses a full-viewport centered grid, safe-area-aware minimum (24px) padding and a fluid card up to (420px). Card padding is (40px 36px), becoming (32px 24px) at (480px); narrow screens use (16px) page and (20px) card insets. No fixed card height prevents reaching content on short screens.
 
 ## Elevation & Depth
 
@@ -379,7 +379,7 @@ Primary actions use accessible action blue with white ink, minimum (44px) shared
 
 ### Inputs / Fields
 
-Card surfaces, foreground ink and `input-border` define shared fields, at least (45px) high with (9px 12px) padding. Mobile entry uses (16px) text. Search remains a real labeled input with an inline outline icon. Invalid fields and uncertain imported values retain semantic borders and explicit feedback; never rely on color alone.
+Card surfaces, foreground ink and `input-border` define shared fields, at least (45px) high with (9px 12px) padding. Mobile entry uses (16px) text. Search remains a real labeled input with an inline outline icon. Invalid fields and overlapping classes retain semantic borders and explicit feedback; never rely on color alone.
 
 ### Navigation
 
@@ -389,9 +389,9 @@ Lucide outline icons and Kodchasan labels identify existing routes. Active links
 
 Written status accompanies semantic color. Availability filters retain count labels, a soft tray and selected-card treatment. Directory containers use ruled whole-row links with identity, duration and relevant course/room/next-class details. Empty states explain missing data and offer existing actions. Keep source schedules and accurate unknown states separate from development fixtures.
 
-### Timetable, Import and Account Surfaces
+### Timetable Editor and Account Surfaces
 
-Events retain six course identities, precise duration/position and overlap columns, with the existing Radix detail dialog. The current class uses an amber marker; today uses a contextual wash. PDF source colors, page/zoom controls, keyboard-focusable preview, individual sessions, source references, warnings, editable fields and explicit review confirmation remain. Accepted personal imports and admin schedule edits remain temporary; account/profile/policy/access records persist through their real existing flows.
+Events retain six course identities, precise duration/position and overlap columns, with the existing Radix detail dialog. The current class uses an amber marker; today uses a contextual wash. The owner timetable editor uses the same semantic tokens, native labeled fields, exact-minute inputs and Radix dialogs. Set semester precedes Add class; overlap confirmation, stale-revision errors and delete confirmation are explicit. Empty personal schedules remain empty until the student adds classes. Shared profiles are read-only and administrators only manage account access. Real account and timetable records persist through authorized server flows; credential-free previews remain temporary.
 
 ### Login Card
 
@@ -404,9 +404,9 @@ The penguin and exact **Koonpinai** wordmark sit above **เวลาว่า�
 - **Do** use the same Cloud & Sky tokens, Mali/Kodchasan families and approved penguin across all routes.
 - **Do** retain exact Koonpinai branding while preserving internal compatibility identifiers.
 - **Do** show truthful empty states and keep development samples distinct from configured user data.
-- **Do** retain stable course semantics, original PDF colors, written status and visible focus.
+- **Do** retain stable course semantics, written status and visible focus.
 - **Do** keep mobile current/next-class content and access controls readable.
-- **Do** preserve real SSO, consent, authorization and temporary-import boundaries.
+- **Do** preserve real SSO, current consent, owner authorization and explicit development-preview boundaries.
 
 ### Don't:
 
@@ -414,4 +414,8 @@ The penguin and exact **Koonpinai** wordmark sit above **เวลาว่า�
 - **Don't** populate missing timetables with sample classes or interpret missing data as free time.
 - **Don't** restore promotional slogans, decorative footers or the removed preview-time control.
 - **Don't** introduce heavy glows, glassmorphism, gradients or decorative dashboard filler.
-- **Don't** imply that imported schedules publish, persist or enable a shared-timetable backend.
+- **Don't** imply that preview edits persist or that missing timetable data means free time.
+
+## Database-first integration
+
+Main’s Cloud & Sky palette, fonts, penguin, compact page hierarchy, live clock, light-only login, motion preferences and removed footer/preview controls remain authoritative. Only the new owner editor styles extend those tokens. Existing members must acknowledge policy `2026-10-22-student-v3`; no acknowledgement is rewritten automatically. Student timetable storage is disabled honestly until the separately reviewed migration is applied. No PDF/OCR or external timetable synchronization controls remain.

@@ -22,3 +22,9 @@ public/vendor/
 *.traineddata.gz
 .DS_Store
 Thumbs.db
+
+# Private database recovery material and account-reference evidence.
+*.dump
+*.dpapi
+*.pgpass
+operations/account-reference*.json

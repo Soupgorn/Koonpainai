@@ -1,6 +1,6 @@
 # KMITL authentication and account access
 
-The existing Contemporary Social Utility interface now uses Auth.js v5's official Keycloak provider, PostgreSQL and Drizzle. The documented v5 release is currently installed as `next-auth@5.0.0-beta.32`; review upgrades before deployment. No university timetable API or timetable publishing is implemented.
+The existing Contemporary Social Utility interface now uses Auth.js v5's official Keycloak provider, PostgreSQL and Drizzle. The documented v5 release is currently installed as `next-auth@5.0.0-beta.32`; review upgrades before deployment. Student-owned timetables use authenticated Server Actions and PostgreSQL; no university timetable provider is used.
 
 ## Local setup
 
@@ -15,17 +15,23 @@ Copy `.env.example` to the ignored `.env.local` and configure:
 | `AUTH_KEYCLOAK_ISSUER` | Optional explicit issuer; any value other than the pinned KMITL issuer fails closed |
 | `DATABASE_URL` | Runtime PostgreSQL connection, including the provider's verified TLS configuration |
 | `DIRECT_DATABASE_URL` | Optional direct/session connection for migrations |
+| `MIGRATION_DATABASE_URL` | Explicit Direct or Session Pooler migration target; takes precedence |
+| `DATABASE_CA_FILE` | Trusted PEM CA bundle for runtime chain and hostname validation |
+| `MIGRATION_DATABASE_CA_FILE` | Optional migration CA override |
 
 Never use `NEXT_PUBLIC_` for credentials. Never paste credentials, callback query strings, tokens or database URLs into issues or logs. `.env*`, private PDFs and `.private/` are ignored. Keep production secret management outside source control.
 
 ```powershell
 npm ci
 npm run auth:check
-npm run db:migrate
+# Read-only inspection; do not migrate until separately approved.
+npm run db:audit
 npm run dev
 ```
 
-`auth:check` fetches live public metadata, validates the endpoints/capabilities and checks database connectivity/schema presence when configured. It never tests the client secret or claims that a real login succeeded. Migrations are explicit, additive and tracked under `drizzle/`; app startup never migrates automatically. If an intentionally supplied runtime/session URL is appropriate for migration while the direct hostname is unavailable, run `npm run db:migrate -- --runtime-url`. Check your database provider's pooler/migration requirements before production use.
+`auth:check` fetches public metadata and checks verified database connectivity; it does not verify a real login. All database entry points share `src/db/connection.ts`: TLS 1.2+, chain validation and hostname matching are mandatory. Only `sslmode=verify-full` is accepted as a URL query option; driver URL parsing cannot replace TLS settings. Mount the trusted provider CA in production and configure its server-only path. Never disable verification.
+
+The migration runner requires an explicitly approved target, compares the complete applied ledger/checksums, rejects transaction pooling and unsafe account-table client grants, and uses an advisory transaction lock and bounded DDL. App startup never migrates. Operational commands require MIGRATION_DATABASE_URL or DIRECT_DATABASE_URL and never fall back to the web DATABASE_URL; legacy `--runtime-url` is rejected. Administrator promotion also uses the operational credential. See [DATABASE_FIRST.md](DATABASE_FIRST.md) for the replacement student timetable migration. Production migration and runtime credential cutover remain separately gated; local code does not authorize either.
 
 Register these exact callbacks with KMITL:
 
@@ -68,7 +74,9 @@ The cookie contains internal member/session IDs, issuer/subject and an absolute 
 
 `members` uses a unique **(OIDC issuer, subject)** index. First login inserts a pending member. Subsequent logins update only verified identity display data and last-login time, preserving nickname, policy, approval and role. No provider token is persisted. `application_sessions` stores session IDs, member references, expiration and revocation timestamps.
 
-Both account tables enable PostgreSQL row-level security with no public policies, preventing ordinary database/API roles from reading or changing them. The server connection must be a trusted table owner or an appropriately configured server role; never distribute that credential to the browser. This matters particularly for providers that expose public-schema tables through a data API. See [PostgreSQL row security](https://www.postgresql.org/docs/current/ddl-rowsecurity.html). Review least-privilege server roles for your deployment.
+Both account tables enable RLS with no policies. **RLS does not protect TRUNCATE or REFERENCES.** The explicitly approved account-grant remediation removed residual `TRUNCATE`/`TRIGGER`/`REFERENCES`/`MAINTAIN` grants from `anon` and `authenticated`; all their account-table/column rights are now absent. Production verification passed. The server still owns these tables and has BYPASSRLS/role/database-creation privileges, so server guards remain essential and least-privilege separation needs review. Never expose that credential to the browser. See [PostgreSQL row security](https://www.postgresql.org/docs/17/ddl-rowsecurity.html).
+
+Scoped account/default privilege repairs and dedicated runtime-role provisioning were completed separately. Their private execution evidence is preserved locally. The active runtime credential cutover is not authorized by this application change.
 
 Private routes require:
 
@@ -87,7 +95,7 @@ To bootstrap an administrator, first complete an actual successful login and its
 npm run users:promote-admin -- '<existing OIDC subject>'
 ```
 
-The command matches the fixed issuer and exact subject, updates an existing record only, and does not print it. It requires possession of the local database credentials; it is never exposed as a web endpoint. Avoid retaining personal subjects in shared shell history. Administrator access management at `/admin/access` changes real pending/approved/suspended records. Existing `/admin` friend/schedule management remains an explicitly labeled temporary demo and does not publish timetables.
+The command matches the fixed issuer and exact subject, updates an existing record only, and does not print it. It requires possession of the local database credentials; it is never exposed as a web endpoint. Avoid retaining personal subjects in shared shell history. Administrator access management at `/admin/access` changes real pending/approved/suspended records. The read-only `/admin` overview reports member/connection state and links to access management; no schedule publishing exists.
 
 ## Logout: local versus university SSO
 
@@ -95,11 +103,11 @@ The command matches the fixed issuer and exact subject, updates an existing reco
 
 Discovery advertises RP-Initiated Logout and an end-session endpoint. Full university SSO logout is deliberately **not enabled**: the client's registered `post_logout_redirect_uri` and ID-token-hint requirements have not been verified. Provider ID tokens are intentionally not retained. A future implementation must verify the actual client registrations, protect the logout initiation and return state, and use the provider-supported protocol and a server-held ID token hint if required. Do not replace logout with an unauthenticated link or the legacy refresh-token POST mechanism.
 
-## Fictional UI and document privacy
+## Student timetable ownership and privacy
 
-`ENABLE_UI_PREVIEW=true` works only in development when **all** real client/session/database values are absent. Even a partial real configuration disables it, and production never permits this bypass. The old `ENABLE_ADMIN_DEMO` flag no longer grants access. Real configured mode protects the fictional friend dataset behind approval; it does not magically turn those examples into real saved schedules.
+Students manage their own persistent timetable entries. Every Server Action derives its actor from the validated Auth.js session, and the repository rechecks profile/current policy/status inside the transaction. Pending students may prepare privately; suspended users cannot edit. Shared reads require viewer and target approval/current acknowledgement. Administrators cannot edit another student's classes. RLS uses transaction-local server context, never Supabase Auth JWTs or auth.uid().
 
-Profile, policy, account status and session records persist in PostgreSQL. PDF.js, Thai/English OCR, review, export and temporary personal timetable previews remain browser-side. Imported timetables are not saved or shared, original PDFs are not uploaded, and GitHub JSON storage and the KMITL timetable API remain unimplemented.
+Policy 2026-10-22-student-v3 requires renewed acknowledgement; stored earlier acknowledgements remain unchanged. The unapplied API metadata migration is retired and preserved, not silently applied. See [DATABASE_FIRST.md](DATABASE_FIRST.md) for schema, RLS, replacement checksums and approval boundaries. No university timetable API, PDF/OCR or university tokens are involved.
 
 ## Verification
 
@@ -126,6 +134,6 @@ Live verification so far: public discovery matched; PostgreSQL connected and the
 
 ## Before production
 
-Complete a real approved-client login/logout test, verify production callback registrations and canonical HTTPS/proxy settings, fix/verify the direct migration connection, review policy/privacy/removal rules, establish admin operations and backups, rotate credentials according to policy, add deployment rate limits/monitoring without sensitive logs, and schedule revoked/expired-session cleanup. Evaluate the pinned Auth.js beta and migration tooling advisories before release. Implement deliberate authorized timetable persistence/sharing separately; no university timetable API is included in this milestone.
+Complete a real approved-client login/logout test, verify production callback registrations and canonical HTTPS/proxy settings, fix/verify the direct migration connection, review policy/privacy/removal rules, establish admin operations and backups, rotate credentials according to policy, add deployment rate limits/monitoring without sensitive logs, and schedule revoked/expired-session cleanup. Evaluate the pinned Auth.js beta and migration tooling advisories before release. Review the new student timetable migration, new-table grants/RLS and backup/restore evidence separately before schema deployment. Preserve renewed sharing acknowledgement; do not reintroduce an external provider as an authentication dependency.
 
 References: [Auth.js Keycloak](https://authjs.dev/getting-started/providers/keycloak), [Auth.js installation](https://authjs.dev/getting-started/installation), [Keycloak OIDC endpoints/logout](https://www.keycloak.org/securing-apps/oidc-layers), [Drizzle PostgreSQL](https://orm.drizzle.team/docs/get-started/postgresql-new).

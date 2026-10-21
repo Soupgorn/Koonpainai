@@ -15,6 +15,13 @@
       "when": 1792523849679,
       "tag": "0001_account_table_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792605397521,
+      "tag": "0002_student_timetables",
+      "breakpoints": true
     }
   ]
 }

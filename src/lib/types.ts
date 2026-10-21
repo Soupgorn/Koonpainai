@@ -22,9 +22,10 @@ export interface Friend {
   initials: string;
   department: string;
   avatar: number;
-  semester: Semester;
+  semester: Semester | null;
   sessions: ClassSession[];
   published: boolean;
+  timetable?: { revision: number; updatedAt: string | null; storageReady: boolean };
 }
 export type AvailabilityKind =
   "in-class" | "free" | "upcoming" | "no-schedule" | "out-of-term";

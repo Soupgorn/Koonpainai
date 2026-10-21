@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { BookOpen, Coffee, MapPin } from "lucide-react";
 import type { ClassSession, Friend } from "@/lib/types";
 import {
@@ -13,7 +12,6 @@ import {
   placeOverlaps,
 } from "@/lib/schedule";
 import { useClock } from "./clock-provider";
-import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -24,10 +22,12 @@ export function WeeklyTimetable({
   friend,
   compact = false,
   personal = false,
+  onEdit,
 }: {
   friend: Friend;
   compact?: boolean;
   personal?: boolean;
+  onEdit?: (session: ClassSession) => void;
 }) {
   const { now } = useClock();
   const local = now ? localParts(now) : null;
@@ -55,8 +55,7 @@ export function WeeklyTimetable({
       <div className="empty-state timetable-empty">
         <BookOpen size={32} strokeWidth={1.4} />
         <h3>No timetable yet</h3>
-        <p>{personal ? "Add your timetable to see your weekly classes." : "Classes and availability will appear when a timetable is shared."}</p>
-        {personal && <Button asChild><Link href="/my-timetable/import">Update timetable</Link></Button>}
+        <p>{personal ? friend.semester ? "Add a class to start planning your week." : "Set your semester dates, then add your weekly classes." : "Classes and availability will appear when a timetable is shared."}</p>
       </div>
     );
   const agenda = daySessions(friend, day);
@@ -107,17 +106,17 @@ export function WeeklyTimetable({
                       left: `calc(${(lane / lanes) * 100}% + 3px)`,
                       width: `calc(${100 / lanes}% - 6px)`,
                     }}
-                    onClick={() => setSelected(s)}
+                    onClick={() => onEdit ? onEdit(s) : setSelected(s)}
                   >
                     <span className="event-time">
                       {s.start}–{s.end}
                     </span>
                     <strong>{s.name}</strong>
-                    <span>{s.room}</span>
+                    <span>{s.room || "Location not set"}</span>
                     <small>
                       {currentIds.includes(s.id)
                         ? "In class now"
-                        : `${s.code} / Sec ${s.section}`}
+                        : `${s.code}${s.section ? ` / Sec ${s.section}` : ""}`}
                     </small>
                   </button>
                 ),
@@ -167,7 +166,7 @@ export function WeeklyTimetable({
               <button
                 className={`agenda-event course-${s.color} ${currentIds.includes(s.id) ? "event-ongoing" : ""}`}
                 key={s.id}
-                onClick={() => setSelected(s)}
+                onClick={() => onEdit ? onEdit(s) : setSelected(s)}
               >
                 <span className="agenda-time">
                   {s.start}
@@ -177,12 +176,12 @@ export function WeeklyTimetable({
                   <span className="agenda-status">
                     {currentIds.includes(s.id)
                       ? "In class now"
-                      : `${s.code} / Section ${s.section}`}
+                      : `${s.code}${s.section ? ` / Section ${s.section}` : ""}`}
                   </span>
                   <h4>{s.name}</h4>
                   <span className="room">
                     <MapPin size={13} />
-                    {s.room}
+                    {s.room || "Location not set"}
                   </span>
                 </div>
               </button>
@@ -227,20 +226,20 @@ export function WeeklyTimetable({
                 </div>
                 <div>
                   <dt>Classroom</dt>
-                  <dd>{selected.room}</dd>
+                  <dd>{selected.room || "Not set"}</dd>
                 </div>
                 <div>
                   <dt>Course code</dt>
-                  <dd>{selected.code}</dd>
+                  <dd>{selected.code || "Not set"}</dd>
                 </div>
                 <div>
                   <dt>Section</dt>
-                  <dd>{selected.section}</dd>
+                  <dd>{selected.section || "Not set"}</dd>
                 </div>
               </dl>
               <p className="dialog-footnote">
                 All times are in Asia/Bangkok. Repeats within{" "}
-                {friend.semester.name}.
+                {friend.semester?.name ?? "Academic semester unavailable"}.
               </p>
             </>
           )}

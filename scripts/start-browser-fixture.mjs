@@ -14,10 +14,14 @@ for (const key of [
   "AUTH_URL",
   "DATABASE_URL",
   "DIRECT_DATABASE_URL",
+  "MIGRATION_DATABASE_URL",
+  "MIGRATION_DATABASE_CA_FILE",
+  "DATABASE_CA_FILE",
+  "DATABASE_POOL_MAX",
   "NEXTAUTH_SECRET",
   "NEXTAUTH_URL",
 ])
-  if (/^(AUTH_|NEXTAUTH_|DATABASE_URL$|DIRECT_DATABASE_URL$)/.test(key))
+  if (/^(AUTH_|NEXTAUTH_|DATABASE_|DIRECT_DATABASE_|MIGRATION_|PG|SUPABASE_)/i.test(key))
     env[key] = "";
 const child = spawn(
   process.execPath,

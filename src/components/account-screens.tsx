@@ -172,18 +172,18 @@ export function SharingPolicy() {
           <div>
             <strong>Review before sharing</strong>
             <p>
-              You’ll check imported classes and semester dates before accepting
-              a timetable. Changes are not published in this preview.
+              You manage your own weekly classes and semester dates. Changes
+              reset on reload in this development preview.
             </p>
           </div>
         </div>
         <div>
           <LockKeyhole size={23} />
           <div>
-            <strong>Your PDF stays on your device</strong>
+            <strong>You control your timetable</strong>
             <p>
-              PDF reading and Thai/English text recognition happen in your
-              browser. No original document is uploaded.
+              Only you can add, edit or delete your classes. Administrators
+              manage account approval, not your timetable.
             </p>
           </div>
         </div>
@@ -369,6 +369,10 @@ export function AccountSettings() {
             </button>
           ))}
         </div>
+      </section>
+      <section className="settings-section">
+        <div><h2>Your timetable</h2><p>Add classes and manage your semester.</p></div>
+        <Link className="button button-outline" href="/my-timetable">Manage my timetable</Link>
       </section>
       <section className="settings-section">
         <div>
