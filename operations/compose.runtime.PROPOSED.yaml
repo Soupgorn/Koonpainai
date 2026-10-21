@@ -1,0 +1,21 @@
+# Deployment template only. No credentials in this file; never auto-started.
+services:
+  web:
+    image: ${KOONPINAI_REVIEWED_IMAGE_DIGEST:?Supply the reviewed immutable image digest}
+    init: true
+    user: '1001:1001'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    pids_limit: 128
+    stop_grace_period: 40s
+    ports: ['127.0.0.1:3000:3000']
+    volumes:
+      - type: bind
+        source: ${KOONPINAI_RUNTIME_SECRET_DIRECTORY:?Runtime-only host directory required}
+        target: /run/secrets
+        read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /app/.next/cache:size=64m,uid=1001,gid=1001,mode=0700
+    restart: 'no' # Enable a bounded policy only after acceptance; avoid auth retry loops.

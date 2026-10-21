@@ -1,5 +1,5 @@
 "use client";
-import { FlaskConical, MapPin } from "lucide-react";
+import { Clock3, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 import type { AvailabilityKind, Friend } from "@/lib/types";
 import { statusLabel } from "@/lib/schedule";
@@ -40,7 +40,7 @@ export function PreviewControl({ fictional = true }: { fictional?: boolean }) {
   const { preview, setPreview } = useClock();
   return (
     <div className={`preview-control ${preview ? "preview-active" : ""}`}>
-      <FlaskConical size={14} />
+      <Clock3 size={14} />
       <span>
         {preview
           ? "Time preview: Tue 20 Oct, 10:30"
@@ -72,7 +72,17 @@ export function DateDisplay() {
             : "--:--"}
           <span className="clock-label">Bangkok</span>
         </strong>
-        <span>{now ? new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year:"numeric", timeZone:"Asia/Bangkok" }).format(now) : "Today in Bangkok"}</span>
+        <span>
+          {now
+            ? new Intl.DateTimeFormat("en-GB", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                timeZone: "Asia/Bangkok",
+              }).format(now)
+            : "Today in Bangkok"}
+        </span>
       </div>
     </div>
   );

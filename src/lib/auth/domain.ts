@@ -9,7 +9,7 @@ export const EXPECTED_ENDPOINTS = {
   end_session_endpoint: `${KMITL_ISSUER}/protocol/openid-connect/logout`,
   jwks_uri: `${KMITL_ISSUER}/protocol/openid-connect/certs`,
 } as const;
-export const POLICY_VERSION = "2026-10-21";
+export const POLICY_VERSION = "2026-10-22-student-v3";
 export const SESSION_SECONDS = 8 * 60 * 60;
 export const profileInput = z.object({
   nickname: z.string().trim().min(1, "Enter your nickname.").max(40),

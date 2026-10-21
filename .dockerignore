@@ -1,0 +1,17 @@
+node_modules
+.next
+.next-e2e
+.git
+.env*
+.private
+.agents
+.codex
+.impeccable
+public/vendor
+test-results
+playwright-report
+*.pdf
+*.log
+*.tsbuildinfo
+output
+tmp

@@ -486,26 +486,10 @@ textarea {
   width: 100%;
   justify-content: space-between;
 }
-.mobile-review-tabs {
-  display: none;
-}
-.import-page .privacy-banner {
-  background: var(--surface);
-  border-color: var(--border);
-}
 .drop-zone {
   background: var(--card);
   border-color: var(--input-border);
   border-radius: 12px;
-}
-.source-panel,
-.review-editor,
-.extraction-summary,
-.processing-card {
-  background: var(--card);
-}
-.review-layout {
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
 }
 .onboard-steps .current i {
   color: var(--primary-foreground);
@@ -658,6 +642,93 @@ textarea {
   background: var(--card);
   border-radius: 12px;
   overflow: hidden;
+}
+.connection-panel {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 0;
+  margin: 20px 0;
+  border-block: 1px solid var(--border);
+}
+.connection-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.connection-copy {
+  min-width: 0;
+}
+.connection-copy p,
+.connection-actions p {
+  color: var(--muted);
+  margin-top: 10px;
+  max-width: 65ch;
+}
+.connection-state {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: var(--status-neutral);
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 650;
+}
+.connection-state-synced {
+  background: var(--free-bg);
+  color: var(--free);
+}
+.connection-state-outdated,
+.connection-state-permission-required {
+  background: var(--class-bg);
+  color: var(--class);
+}
+.connection-state-sync-failed {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.connection-details {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.connection-details dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.connection-details dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+.connection-actions {
+  max-width: 280px;
+  flex-shrink: 0;
+}
+.settings-section .connection-panel {
+  margin: 0;
+  padding-top: 0;
+  border: 0;
+  flex-direction: column;
+  gap: 20px;
+}
+.settings-section .connection-actions {
+  max-width: none;
+}
+@media (max-width: 760px) {
+  .connection-panel {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .connection-details {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .connection-actions {
+    max-width: none;
+  }
 }
 .access-row {
   display: flex;
@@ -1195,36 +1266,6 @@ textarea {
     margin-left: 0;
     width: 100%;
   }
-  .mobile-review-tabs {
-    display: flex;
-    gap: 8px;
-    border-bottom: 1px solid var(--border);
-    margin: 24px 0;
-  }
-  .mobile-review-tabs button {
-    min-height: 46px;
-    flex: 1;
-    background: transparent;
-    color: var(--muted);
-    font-size: 12px;
-    border-bottom: 2px solid transparent;
-  }
-  .mobile-review-tabs button[aria-pressed="true"] {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-  .review-layout {
-    display: block;
-  }
-  .review-layout[data-mobile-panel="review"] .source-panel {
-    display: none;
-  }
-  .review-layout[data-mobile-panel="source"] > .review-editor {
-    display: none;
-  }
-  .review-layout .source-panel {
-    margin-bottom: 24px;
-  }
 }
 @media (max-width: 360px) {
   .topbar {
@@ -1273,13 +1314,6 @@ textarea {
   color: var(--primary);
   padding: 14px 0;
   font-size: 13px;
-}
-.personal-import-action {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 22px;
 }
 /* Corrections found in the first rendered comparison with the approved comp. */
 .free-person {
@@ -1491,4 +1525,36 @@ textarea {
 .approval-list .lucide-info,
 .approval-list .lucide-clock-3 {
   color: var(--muted);
+}
+.profile-page #refresh-unavailable {
+  margin: 18px 0 24px;
+}
+
+/* Student-owned timetable editor; shared theme tokens in both appearances. */
+.timetable-manager .imported-profile { padding: 0; }
+.timetable-tools, .editor-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.timetable-manager .profile-hero { flex-wrap: wrap; }
+.timetable-manager .profile-hero > .timetable-tools { flex: 0 0 auto; }
+.timetable-manager .timetable-updated { margin: 20px 0 36px; }
+.timetable-editor { width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; }
+.timetable-editor-form { display: grid; gap: 20px; margin-top: 24px; }
+.timetable-editor-form fieldset { display: grid; gap: 16px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.timetable-form-pair { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; }
+.timetable-editor .field { min-width: 0; margin: 0; }
+.timetable-editor .dialog-x { min-width: 44px; min-height: 44px; top: 8px; right: 8px; }
+.timetable-editor input, .timetable-editor select { width: 100%; min-width: 0; min-height: 44px; background: var(--card); color: var(--foreground); border: 1px solid var(--input-border); border-radius: 8px; padding: 10px 12px; font: inherit; }
+.timetable-editor input[type=checkbox] { width: 18px; height: 18px; min-height: 18px; flex-shrink: 0; accent-color: var(--primary); }
+.timetable-editor small { font-weight: 400; color: var(--muted); }
+.timetable-editor .editor-actions { justify-content: flex-end; }
+.overlap-review { background: var(--warning-surface); border: 1px solid var(--warning-border); border-radius: 8px; padding: 14px; }
+.overlap-review p { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; overflow-wrap: anywhere; }
+.overlap-review label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+@media (max-width: 600px) {
+ .timetable-manager .profile-hero > .timetable-tools { flex: 0 0 100%; }
+ .timetable-manager .profile-hero .profile-title { flex-basis: 100%; }
+ .timetable-tools { width: 100%; }
+ .timetable-tools .button { flex: 1; }
+ .timetable-editor { padding: 24px 20px; }
+ .timetable-form-pair { gap: 12px; }
+ .editor-actions .button { flex-grow: 1; }
 }

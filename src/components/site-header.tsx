@@ -101,7 +101,7 @@ export function SiteHeader({
         )}
         <div className="header-right">
           <span className="community">
-            {entry ? "Where are your friends?" : "KMITL students"}
+            {entry ? "Where are your friends?" : null}
           </span>
           <ThemeControl />
           {!entry &&

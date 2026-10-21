@@ -1,7 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdir } from "node:fs/promises";
-import { textPdfFixture } from "../fixtures/pdf-fixtures";
 
 test("theme: system default, manual override, reload persistence, keyboard and route consistency", async ({
   page,
@@ -55,7 +54,7 @@ test("theme: system default, manual override, reload persistence, keyboard and r
     "/pending-approval",
     "/account",
     "/admin/access",
-    "/admin/import",
+    "/admin",
   ]) {
     await page.goto(path);
     await expect(page.locator("html")).toHaveClass(/light/);
@@ -99,7 +98,7 @@ test("redesigned routes: both themes, accessibility, responsive layout and scree
     ["friend-profile", "/friends/bean"],
     ["my-timetable", "/my-timetable"],
     ["login", "/login"],
-    ["pdf-import", "/admin/import"],
+    ["admin", "/admin"],
     ["onboarding", "/onboarding"],
     ["policy", "/onboarding/policy"],
     ["approval", "/pending-approval"],
@@ -147,7 +146,7 @@ test("redesigned routes: both themes, accessibility, responsive layout and scree
       "/my-timetable",
       "/onboarding",
       "/account",
-      "/admin/import",
+      "/admin",
     ]) {
       await page.goto(path);
       expect(
@@ -206,110 +205,4 @@ test("account previews stay temporary and SSO never pretends to authenticate", a
   );
   const keys = await page.evaluate(() => Object.keys(localStorage));
   expect(keys.filter((k) => k !== "koonpinai-theme")).toEqual([]);
-});
-
-test("personal import: real extracted data, dark review, temporary timetable and valid export", async ({
-  page,
-}, info) => {
-  await page.clock.install({ time: new Date("2026-10-20T10:30:00+07:00") });
-  await page.emulateMedia({ colorScheme: "dark" });
-  await page.goto("/my-timetable/import");
-  await page.locator("input[type=file]").setInputFiles({
-    name: "fictional-timetable.pdf",
-    mimeType: "application/pdf",
-    buffer: Buffer.from(await textPdfFixture()),
-  });
-  await page
-    .getByRole("button", { name: "Read timetable", exact: true })
-    .click();
-  await expect(page.locator(".class-editor")).toHaveCount(9);
-  await page.getByLabel("Nickname", { exact: true }).fill("Imported June");
-  await page.getByLabel("Semester starts", { exact: true }).fill("2026-08-03");
-  await page.getByLabel("Semester ends", { exact: true }).fill("2026-12-13");
-  const dir = ".impeccable/review/approved-redesign/final";
-  await mkdir(dir, { recursive: true });
-  for (const mode of ["dark", "light"]) {
-    const target =
-      mode === "light" ? "Switch to Light Mode" : "Switch to Dark Mode";
-    if (await page.getByRole("button", { name: target, exact: true }).count())
-      await page.getByRole("button", { name: target, exact: true }).click();
-    const a11y = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-      .analyze();
-    expect(
-      a11y.violations.map((v) => ({
-        id: v.id,
-        targets: v.nodes.map((n) => n.target),
-      })),
-    ).toEqual([]);
-    await page.screenshot({
-      path: `${dir}/pdf-review-${info.project.name}-${mode}.png`,
-      fullPage: true,
-      animations: "disabled",
-    });
-  }
-  if (info.project.name === "mobile") {
-    await page
-      .getByRole("button", { name: "Original PDF", exact: true })
-      .click();
-    await expect(page.locator(".pdf-canvas-scroll canvas")).toBeVisible();
-    await page.getByRole("button", { name: /Review classes/ }).click();
-  }
-  await page.getByRole("checkbox", { name: /I checked every session/ }).check();
-  await page.getByRole("button", { name: "Preview schedule" }).click();
-  const downloadEvent = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download schedule JSON" }).click();
-  await downloadEvent;
-  await page
-    .getByRole("button", { name: "Use in my temporary preview" })
-    .click();
-  await page
-    .getByRole("link", { name: "View My Timetable", exact: true })
-    .click();
-  await expect(page.locator("main")).toContainText(
-    "Your reviewed import is held in memory",
-  );
-  await page.reload();
-  await expect(page.locator("main")).toContainText("Fictional sample schedule");
-});
-
-test("destructive dialog hover remains readable in both themes", async ({
-  page,
-}, info) => {
-  const dir = ".impeccable/review/approved-redesign/final";
-  await mkdir(dir, { recursive: true });
-  for (const mode of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme: mode, reducedMotion: "reduce" });
-    await page.goto("/admin");
-    await page
-      .getByRole("button", { name: "Remove Bean", exact: true })
-      .click();
-    const action = page.getByRole("button", {
-      name: "Remove from demo",
-      exact: true,
-    });
-    await action.hover();
-    const colors = await action.evaluate((element) => {
-      const s = getComputedStyle(element);
-      return { ink: s.color, fill: s.backgroundColor, border: s.borderColor };
-    });
-    expect(colors.ink).not.toBe(colors.fill);
-    expect(colors.border).toBe(colors.ink);
-    const axe = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-      .analyze();
-    expect(
-      axe.violations.map((v) => ({
-        id: v.id,
-        targets: v.nodes.map((n) => n.target),
-      })),
-    ).toEqual([]);
-    await page.screenshot({
-      path: `${dir}/admin-dialog-${info.project.name}-${mode}.png`,
-      fullPage: true,
-      animations: "disabled",
-    });
-    await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog")).not.toBeVisible();
-  }
 });

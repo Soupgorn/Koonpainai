@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "artifactSha256": "REPLACE_WITH_VERIFIED_RUNTIME_ARTIFACT_MANIFEST_SHA256",
+  "authUrl": "https://YOUR-APPROVED-DOMAIN/",
+  "clientId": "YOUR-APPROVED-CLIENT-ID",
+  "database": { "file": "/run/secrets/runtime-url", "format": "text" },
+  "authSecret": { "file": "/run/secrets/auth-secret", "format": "text" },
+  "clientSecret": { "file": "/run/secrets/oidc-secret", "format": "text" },
+  "caFile": "/run/secrets/database-ca.crt",
+  "port": 3000,
+  "healthPort": 3001,
+  "host": "0.0.0.0",
+  "shutdownMs": 30000
+}

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { ArrowLeft, Clock3, Info, MapPin, Upload } from "lucide-react";
+import { ArrowLeft, Clock3, Info, MapPin } from "lucide-react";
+import type { ReactNode } from "react";
 import type { Friend } from "@/lib/types";
 import {
   getAvailability,
@@ -12,22 +13,25 @@ import { fixtureLabel } from "@/lib/display";
 import { useClock } from "./clock-provider";
 import { Avatar, DateDisplay, PreviewControl, StatusBadge } from "./shared";
 import { WeeklyTimetable } from "./weekly-timetable";
-import { Button } from "./ui/button";
 export function FriendProfile({
   friend,
   embedded = false,
   sample = true,
   personal = false,
+  controls,
+  onEdit,
 }: {
   friend: Friend;
   embedded?: boolean;
   sample?: boolean;
   personal?: boolean;
+  controls?: ReactNode;
+  onEdit?: (session: import("@/lib/types").ClassSession) => void;
 }) {
   const { now } = useClock();
   const status = now ? getAvailability(friend, now) : null;
   const Container = embedded ? "div" : "main";
-  const Heading = embedded ? "h2" : "h1";
+  const Heading = embedded && !personal ? "h2" : "h1";
   const label = (value: string) => (sample ? fixtureLabel(value) : value);
   const current = status?.current[0];
   const next = status?.next;
@@ -76,32 +80,22 @@ export function FriendProfile({
               : `${friend.department} · KMITL`}
           </p>
         </div>
-        {personal ? (
-          <Button asChild>
-            <Link href="/my-timetable/import">
-              <Upload size={16} />
-              Update timetable
-            </Link>
-          </Button>
-        ) : (
+        {personal ? controls : (
           !embedded && <DateDisplay />
         )}
       </section>
-      {personal && (
+      {personal && sample && (
         <p className="preview-notice">
           <Info size={16} />
           <span>
-            Personal timetable preview.{" "}
-            {sample
-              ? "Fictional sample schedule."
-              : friend.sessions.length
-                ? "Your reviewed import is held in memory."
-                : "No import has been added yet."}{" "}
-            Nothing is saved or shared. Reloading resets this preview.
+            Fictional sample schedule. Changes in this preview stay in memory
+            and reset when you reload.
           </span>
         </p>
       )}
-      {status && now ? (
+      {personal && !sample && <p className="schedule-note">Only you can edit this timetable. It is shared only while your account is approved and the current policy is acknowledged.</p>}
+      {friend.timetable && status?.kind === "no-schedule" ? null : status &&
+        now ? (
         <section className="schedule-summary" aria-label="Current availability">
           <div>
             <div className="status-title">
@@ -176,13 +170,20 @@ export function FriendProfile({
           <div>
             <h2>{personal ? "Your week" : `${friend.nickname}’s week`}</h2>
             <p>
-              {friend.semester.name} · {friend.semester.start} to{" "}
-              {friend.semester.end}
+              {friend.semester ? (
+                <>
+                  {friend.semester.name} · {friend.semester.start} to{" "}
+                  {friend.semester.end}
+                </>
+              ) : (
+                "Set your semester dates, then add your weekly classes."
+              )}
             </p>
           </div>
-          <span className="timezone-note">Weekly schedule · Bangkok time</span>
+          <span className="timezone-note">{onEdit ? "Select a class to edit or delete" : "Weekly schedule · Bangkok time"}</span>
         </div>
         <WeeklyTimetable
+          onEdit={onEdit}
           friend={
             sample
               ? {
@@ -202,7 +203,7 @@ export function FriendProfile({
           check before making plans.
         </p>
       </section>
-      <PreviewControl fictional={sample} />
+      {sample && <PreviewControl />}
     </Container>
   );
 }

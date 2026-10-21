@@ -114,58 +114,36 @@ test("profile has accurate status, accessible class details, responsive timetabl
     page.getByRole("heading", { name: "A little off the timetable." }),
   ).toBeVisible();
 });
-test("admin edits, adds and removes friends only in its temporary demo", async ({
+test("admin manages approvals and views members without timetable editing or PDF management", async ({
   page,
 }, info) => {
   await page.goto("/admin");
   await expect(
-    page.getByRole("main").getByText("Admin demo", { exact: true }),
+    page.getByRole("heading", { name: "Approved members", exact: true }),
   ).toBeVisible();
-  await capture(page, `${info.project.name}-admin`);
+  await expect(
+    page.getByText("Account approvals. Students manage their own classes."),
+  ).toBeVisible();
+  await expect(page.locator("input[type=file]")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /import/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Add friend" })).toHaveCount(0);
+  await capture(page, info.project.name + "-admin");
   await noOverflow(page);
-  await page.getByRole("button", { name: "Edit Bean", exact: true }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("textbox", { name: "Nickname", exact: true })
-    .fill("Bean edited");
-  await page.getByRole("button", { name: "Save demo changes" }).click();
-  await expect(page.getByRole("status")).toContainText("Friend saved");
-  await expect(
-    page.getByRole("row").filter({ hasText: "Bean edited" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Add friend", exact: true }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("textbox", { name: "Nickname", exact: true })
-    .fill("Demo friend");
-  await page.getByRole("button", { name: "Save demo changes" }).click();
-  await expect(
-    page.getByRole("row").filter({ hasText: "Demo friend" }),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Remove Demo friend", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Remove from demo", exact: true })
-    .click();
-  await expect(
-    page.getByRole("row").filter({ hasText: "Demo friend" }),
-  ).toHaveCount(0);
-  await page.reload();
-  await expect(
-    page.getByRole("row").filter({ hasText: "Bean edited" }),
-  ).toHaveCount(0);
-  const a11y = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-    .analyze();
-  expect(a11y.violations).toEqual([]);
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
 });
+
 test("narrow phone and tablet layouts remain inside the viewport", async ({
   page,
 }) => {
   for (const width of [320, 768]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const route of ["/", "/friends/oak", "/admin", "/admin/import"]) {
+    for (const route of ["/", "/friends/oak", "/admin", "/account"]) {
       await page.goto(route);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       await noOverflow(page);

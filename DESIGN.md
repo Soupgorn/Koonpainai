@@ -225,7 +225,7 @@ components:
 
 Koonpinai makes a free window easy to spot. The approved Contemporary Social Utility (Concept C) world pairs a geometric K wordmark, Manrope typography, rounded-square initials and flat, ruled groups. Periwinkle identifies actions; green and amber describe availability while course hues identify subjects.
 
-Light appearance uses a near-white canvas and white surfaces. Dark appearance translates the same hierarchy into blue-charcoal and navy surfaces with off-white ink. Both preserve the approved composition, readable Thai names, timetable positions and original PDF colors. Motion explains interaction state rather than staging page entrances.
+Light appearance uses a near-white canvas and white surfaces. Dark appearance translates the same hierarchy into blue-charcoal and navy surfaces with off-white ink. Both preserve the approved composition, readable Thai names, timetable positions and source-state honesty. Motion explains interaction state rather than staging page entrances.
 
 **Key Characteristics:**
 
@@ -237,7 +237,7 @@ Light appearance uses a near-white canvas and white surfaces. Dark appearance tr
 
 ## Colors
 
-The normative frontmatter records the actual light colors and their `dark-` counterparts from `src/app/redesign.css`. CSS custom properties remain the implementation source of truth; `.dark` switches role values without changing content or layout. The approved composition lives in `src/app/approved-design.css`; global shared/importer/admin styles load first, followed by that composition and the redesign overrides.
+The normative frontmatter records the actual light colors and their `dark-` counterparts from `src/app/redesign.css`. CSS custom properties remain the implementation source of truth; `.dark` switches role values without changing content or layout. The approved composition lives in `src/app/approved-design.css`; global shared/admin styles load first, followed by that composition and the redesign overrides.
 
 ### Primary
 
@@ -285,7 +285,7 @@ The directory leads with two-column free-person rows inside one flat bordered gr
 
 Mobile navigation is fixed to the bottom, reserves (78px) body space and includes safe-area padding. Desktop navigation stays in the header. The current route is visible in both. Personal strips and account entries appear for authenticated members or an explicitly enabled fictional development preview.
 
-The friend timetable keeps the seven-day desktop grid, exact event positions and overlapping columns. At (900px) or less it switches to a day selector and agenda. The PDF workspace shows source and review side by side on desktop, stacks at tablet widths, and uses Source/Review panel controls at (760px) or less. Login and onboarding split narratives/forms on desktop and stack on phones.
+The friend timetable keeps the seven-day desktop grid, exact event positions and overlapping columns. At (900px) or less it switches to a day selector and agenda. Login and onboarding split narratives/forms on desktop and stack on phones.
 
 ## Elevation & Depth
 
@@ -309,7 +309,7 @@ Primary actions use periwinkle with contrasting foreground, at least (44px) high
 
 ### Inputs / Fields
 
-Shared fields use a card surface, foreground ink, an input boundary, (45px) minimum height and (9px 12px) padding. Onboarding/profile fields use a slightly tighter corner and (10px 12px) padding; mobile fields are (47px) high with (16px) text. Search includes an inline outline icon, a real text input and a focus-within treatment. Invalid or uncertain values pair warning borders with explicit review text. Do not replace native labels or required/disabled semantics with color.
+Shared fields use a card surface, foreground ink, an input boundary, (45px) minimum height and (9px 12px) padding. Onboarding/profile fields use a slightly tighter corner and (10px 12px) padding; mobile fields are (47px) high with (16px) text. Search includes an inline outline icon, a real text input and a focus-within treatment. Invalid values pair warning borders with explicit validation text. Do not replace native labels or required/disabled semantics with color.
 
 ### Navigation
 
@@ -327,18 +327,18 @@ The directory is a grouped flat container with ruled child links, not a set of l
 
 Six subject pairs color events consistently in both themes. The current class has an inset amber marker, today has a subtle contextual column, and all events retain exact schedule geometry. Agenda entries expose start/end times, course and room as larger readable content. Short desktop events may hide secondary metadata instead of distorting their true duration. Clicking an event opens the existing Radix class-detail dialog.
 
-### PDF Review and Account Preview
+### Timetable Connection and Accounts
 
-Source preview preserves the PDF's actual colors on its canvas, with page/zoom controls and a keyboard-focusable source region. Review retains individual sessions, source references, editable fields, warnings and explicit confirmation before preview/export. Mobile Source/Review controls switch panels without inventing a separate content model.
+Connection information uses a flat ruled panel with a written state, source and actual last-synchronization timestamp. Do not invent progress, dates or success. API unavailable means availability is unknown; it is never styled as Free. The seven connection states use semantic surface/ink tokens in both themes. Refresh remains disabled with a nearby explanation until an approved API exists. At mobile widths source details stack; no horizontal scrolling is introduced. Fictional timetable previews remain explicitly labeled and credential-free only.
 
-Account, policy, approval and access surfaces preserve this vocabulary. Configured mode uses real server-validated profile/policy progress and pending/approved/suspended status. Profile and acknowledgement forms give pending, success and error feedback; local logout explicitly says that KMITL SSO may remain active. The header identity comes from the authenticated account. Account appearance uses the existing three choices without duplicating the header disclosure ID. Credential-free development previews retain explicit fictional notices, while temporary imports never imply publishing or persistence.
+Configured accounts use actual server-validated profile/policy/approval and eligible-member directory reads. Forms retain pending/success/error feedback; local logout explains that university SSO may remain active. Sharing acknowledgement and university API permission are separate. No PDF upload/review UI remains. The approved type, layout, theme behavior and timetable visualization remain intact.
 
 ## Do's and Don'ts
 
 ### Do:
 
 - **Do** preserve the approved Concept C composition and free-window hierarchy.
-- **Do** keep course identities consistent across themes and show PDF source colors faithfully.
+- **Do** keep course identities consistent across themes and preserve exact normalized schedule times.
 - **Do** retain written statuses, visible focus, labeled controls and reduced-motion behavior.
 - **Do** preserve mobile next-class names and the day agenda instead of compressing a weekly grid.
 - **Do** label fictional data, temporary edits and disconnected account actions honestly.
@@ -350,3 +350,7 @@ Account, policy, approval and access surfaces preserve this vocabulary. Configur
 - **Don't** add heavy shadows, gradients, neon accents or page entrance choreography.
 - **Don't** treat compact timetable metadata sizes as the default for new body text.
 - **Don't** imply that preview edits save, publish, submit approval or grant access.
+
+## Student-managed timetable refinement — 22 October 2026
+
+The approved visual world stays unchanged. My Timetable replaces disabled provider controls with Set/Edit semester and Add class. A focused Radix editor uses existing fields/buttons and theme tokens; mobile places its two actions below the title. Existing weekly blocks open Edit only for the owner; other profiles remain read-only. Optional code/section/location never become fabricated values. Overlap warnings require confirmation, deletions have explicit confirmation, and pending/error/empty/storage-not-enabled states explain the next action. Source/last-sync UI is retired; saved time is labeled in Bangkok. Development changes are explicitly in-memory. Policy copy/version now describes student-entered persistent schedules; see DATABASE_FIRST.md.

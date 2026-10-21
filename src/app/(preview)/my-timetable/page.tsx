@@ -1,6 +1,11 @@
 import { MyTimetable } from "@/components/my-timetable";
-import { requireSharedAccess } from "@/lib/auth/access";
+import { getMyTimetable } from "@/lib/friends-repository";
+import { isUiPreviewEnabled } from "@/lib/preview";
 export default async function Page() {
-  await requireSharedAccess();
-  return <MyTimetable />;
+  return (
+    <MyTimetable
+      friend={await getMyTimetable()}
+      sample={isUiPreviewEnabled()}
+    />
+  );
 }

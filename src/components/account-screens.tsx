@@ -21,6 +21,7 @@ import { BrandMark } from "./site-header";
 import { usePersonalPreview } from "./personal-preview-provider";
 import { Button } from "./ui/button";
 import { StatusBadge } from "./shared";
+
 import { signInWithKmitl } from "@/lib/auth/actions";
 
 function PreviewNotice() {
@@ -29,8 +30,8 @@ function PreviewNotice() {
       <Info size={16} />
       <span>
         <strong>Interface preview.</strong> No SSO session or account is
-        created. Profile, approval, and timetable changes stay in memory and
-        reset on reload.
+        created. Profile and approval changes stay in memory and reset on
+        reload.
       </span>
     </p>
   );
@@ -215,8 +216,7 @@ export function Onboarding() {
         <div className="aside-reassurance">
           <ShieldCheck size={23} />
           <p>
-            Your timetable will only be shared after you acknowledge the policy
-            and access is approved.
+            Add your own classes and keep your week up to date. Sharing requires current policy acknowledgement and account approval.
           </p>
         </div>
       </aside>
@@ -313,20 +313,18 @@ export function SharingPolicy() {
         <div>
           <Eye size={23} />
           <div>
-            <strong>Review before sharing</strong>
+            <strong>Your timetable, your changes</strong>
             <p>
-              You’ll check imported classes and semester dates before accepting
-              a timetable. Changes are not published in this preview.
+              You add, edit and delete your classes. This fictional preview keeps changes in memory and resets on reload.
             </p>
           </div>
         </div>
         <div>
           <LockKeyhole size={23} />
           <div>
-            <strong>Your PDF stays on your device</strong>
+            <strong>Shared with approved members</strong>
             <p>
-              PDF reading and Thai/English text recognition happen in your
-              browser. No original document is uploaded.
+              Pending and suspended members cannot view shared timetables. Administrators manage account approvals, not other students’ classes.
             </p>
           </div>
         </div>
@@ -515,6 +513,15 @@ export function AccountSettings() {
               {label}
             </button>
           ))}
+        </div>
+      </section>
+      <section className="settings-section">
+        <div>
+          <h2>Your timetable</h2>
+          <p>You manage your own weekly classes.</p>
+        </div>
+        <div>
+          <p>Explore Add, Edit and Delete with fictional classes. Nothing in this preview is saved to an account.</p><Link className="button button-outline" href="/my-timetable">Manage my timetable</Link>
         </div>
       </section>
       <section className="settings-section">

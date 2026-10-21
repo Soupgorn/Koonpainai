@@ -11,7 +11,7 @@ import { ClockProvider } from "@/components/clock-provider";
 import { SiteHeader } from "@/components/site-header";
 export const metadata: Metadata = {
   title: {
-    default: "Koonpinai — Where are your friends?",
+    default: "Koonpinai",
     template: "%s · Koonpinai",
   },
   description:
@@ -37,7 +37,6 @@ export default async function RootLayout({
           <PersonalPreviewProvider
             key={member ? member.id : "fictional"}
             initialProfile={profile}
-            fictional={preview}
           >
             <ClockProvider>
               <a className="skip-link" href="#main">

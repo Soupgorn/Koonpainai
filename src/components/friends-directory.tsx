@@ -16,7 +16,8 @@ import type { Availability, Friend } from "@/lib/types";
 import { getAvailability, localParts, nextLabel } from "@/lib/schedule";
 import { fixtureLabel } from "@/lib/display";
 import { useClock } from "./clock-provider";
-import { usePersonalPreview } from "./personal-preview-provider";
+
+
 import {
   Avatar,
   DateDisplay,
@@ -58,8 +59,14 @@ function FreePerson({ friend, status, now }: Entry & { now: Date }) {
     </Link>
   );
 }
-function ClassRow({ friend, status, now }: Entry & { now: Date }) {
+function ClassRow({
+  friend,
+  status,
+  now,
+  sample,
+}: Entry & { now: Date; sample: boolean }) {
   const current = status.current[0];
+  const label = sample ? fixtureLabel : (value: string) => value;
   return (
     <Link href={`/friends/${friend.id}`} className="friend-card class-row">
       <div className="identity">
@@ -73,7 +80,9 @@ function ClassRow({ friend, status, now }: Entry & { now: Date }) {
             {current
               ? `In class until ${status.freeAt}`
               : status.kind === "no-schedule"
-                ? "No schedule"
+                ? friend.timetable
+                  ? "No schedule"
+                  : "No schedule"
                 : "Outside semester"}
           </span>
         </div>
@@ -81,15 +90,17 @@ function ClassRow({ friend, status, now }: Entry & { now: Date }) {
       <div className="row-course">
         <strong>
           {current
-            ? fixtureLabel(current.name)
+            ? label(current.name)
             : status.kind === "no-schedule"
-              ? "No timetable added yet"
+              ? friend.timetable
+                ? "Availability unknown"
+                : "No timetable added yet"
               : "Between semesters"}
           {status.current.length > 1 && (
             <small> +{status.current.length - 1} overlapping</small>
           )}
         </strong>
-        {current && <Room>{fixtureLabel(current.room)}</Room>}
+        {current && <Room>{label(current.room)}</Room>}
       </div>
       <span className="row-status">
         <StatusBadge kind={status.kind} />
@@ -102,9 +113,11 @@ function ClassRow({ friend, status, now }: Entry & { now: Date }) {
             ? status.next.date === localParts(now).date
               ? status.next.session.start
               : nextLabel(status.next, now)
-            : "No upcoming classes"}
+            : friend.timetable && status.kind === "no-schedule"
+              ? "No class data available"
+              : "No upcoming classes"}
         </strong>
-        {status.next && <small>{fixtureLabel(status.next.session.name)}</small>}
+        {status.next && <small>{label(status.next.session.name)}</small>}
       </span>
       <ChevronRight size={17} />
     </Link>
@@ -112,13 +125,14 @@ function ClassRow({ friend, status, now }: Entry & { now: Date }) {
 }
 export function FriendsDirectory({
   friends,
-  showPersonal = false,
+  personalFriend,
+  sample = false,
 }: {
   friends: Friend[];
-  showPersonal?: boolean;
+  personalFriend?: Friend;
+  sample?: boolean;
 }) {
   const { now } = useClock();
-  const { timetable } = usePersonalPreview();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -151,7 +165,8 @@ export function FriendsDirectory({
   const other = shown.filter((e) =>
     ["no-schedule", "out-of-term"].includes(e.status.kind),
   );
-  const personal = now ? getAvailability(timetable, now) : null;
+  const personal =
+    now && personalFriend ? getAvailability(personalFriend, now) : null;
   return (
     <main id="main" className="main-container dashboard">
       <section className="page-heading">
@@ -161,19 +176,28 @@ export function FriendsDirectory({
         </div>
         <DateDisplay />
       </section>
-      {showPersonal && personal?.next && (
+      {personal?.next && (
         <aside className="own-strip">
           <CalendarDays className="own-icon" size={24} />
           <div>
-            <span className="small-label">Your next class · preview</span>
-            <strong>{fixtureLabel(personal.next.session.name)}</strong>
+            <span className="small-label">
+              Your next class{sample ? " · preview" : ""}
+            </span>
+            <strong>
+              {sample
+                ? fixtureLabel(personal.next.session.name)
+                : personal.next.session.name}
+            </strong>
           </div>
           <div className="own-time">
             <strong>
               {personal.next.session.start}–{personal.next.session.end}
             </strong>
             <span>
-              {fixtureLabel(personal.next.session.room)} ·{" "}
+              {sample
+                ? fixtureLabel(personal.next.session.room)
+                : personal.next.session.room}{" "}
+              ·{" "}
               {personal.next.date === localParts(now!).date
                 ? "Today"
                 : nextLabel(personal.next, now!).split(",")[0]}
@@ -184,7 +208,14 @@ export function FriendsDirectory({
           </Link>
         </aside>
       )}
-      <PreviewControl />
+      {sample ? (
+        <PreviewControl />
+      ) : (
+        <p className="schedule-note">
+          Approved members only. Missing timetable data means availability is
+          unknown.
+        </p>
+      )}
       <section aria-label="Friends directory">
         <div className="toolbar">
           <div className="search">
@@ -268,8 +299,10 @@ export function FriendsDirectory({
               {query
                 ? `No friends matching “${query}”`
                 : filter === "class"
-                  ? "Everyone’s out of class."
-                  : "No one’s free just now."}
+                  ? "No confirmed classes right now."
+                  : !friends.length
+                    ? "No approved friends yet."
+                    : "No confirmed free time right now."}
             </h2>
             <p>Try another nickname in English or Thai, or show everyone.</p>
             <Button
@@ -323,7 +356,12 @@ export function FriendsDirectory({
                 </div>
                 <div className="class-roster">
                   {studying.map((e) => (
-                    <ClassRow key={e.friend.id} {...e} now={now} />
+                    <ClassRow
+                      key={e.friend.id}
+                      {...e}
+                      now={now}
+                      sample={sample}
+                    />
                   ))}
                 </div>
               </section>
@@ -340,7 +378,12 @@ export function FriendsDirectory({
                 </div>
                 <div className="class-roster">
                   {other.map((e) => (
-                    <ClassRow key={e.friend.id} {...e} now={now} />
+                    <ClassRow
+                      key={e.friend.id}
+                      {...e}
+                      now={now}
+                      sample={sample}
+                    />
                   ))}
                 </div>
               </section>

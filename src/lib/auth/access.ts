@@ -36,6 +36,14 @@ export async function requireSharedMember() {
 export async function requireSharedAccess() {
   if (!isFictionalPreview()) await requireSharedMember();
 }
+export async function requireTimetableMember() {
+  const member = await requireMember();
+  const gate = memberGate(member);
+  if (gate === "suspended") redirect("/pending-approval");
+  if (gate === "profile") redirect("/onboarding");
+  if (gate === "policy") redirect("/onboarding/policy");
+  return member; // Pending students may prepare their own, still-private schedule.
+}
 export async function requireAdmin() {
   const member = await requireSharedMember();
   if (member.role !== "admin") notFound();

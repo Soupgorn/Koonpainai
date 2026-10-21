@@ -8,10 +8,10 @@ import {
   placeOverlaps,
 } from "../src/lib/schedule";
 import {
-  importErrors,
+  scheduleErrors,
   sessionErrors,
   overlapCount,
-} from "../src/lib/import-validation";
+} from "../src/lib/timetable/validation";
 import type { ClassSession, Friend } from "../src/lib/types";
 const bean = friends[0];
 const at = (date: string, time: string) => new Date(`${date}T${time}:00+07:00`);
@@ -88,7 +88,7 @@ test("outside semester is not in class, and next class respects future semester 
 test("semester end date is inclusive", () => {
   const ending: Friend = {
     ...bean,
-    semester: { ...bean.semester, end: "2026-10-20" },
+    semester: { ...bean.semester!, end: "2026-10-20" },
   };
   assert.equal(
     getAvailability(ending, at("2026-10-20", "10:00")).kind,
@@ -139,7 +139,7 @@ test("overlap layout assigns separate lanes and reclaims lanes for later classes
     ],
   );
 });
-test("import validation catches missing rooms and reversed times", () => {
+test("schedule validation permits optional rooms and rejects reversed times", () => {
   const invalid = {
     ...bean.sessions[0],
     room: "",
@@ -147,27 +147,30 @@ test("import validation catches missing rooms and reversed times", () => {
     end: "09:00",
   };
   assert.deepEqual(sessionErrors(invalid), [
-    "Add a classroom.",
     "End time must be after start time.",
   ]);
 });
-test("import validation rejects invalid dates and empty schedules", () => {
+test("schedule validation rejects invalid dates and empty schedules", () => {
   assert.ok(
-    importErrors(
+    scheduleErrors(
       "Bean",
-      { ...bean.semester, start: "2026-02-31" },
+      { ...bean.semester!, start: "2026-02-31" },
       bean.sessions,
     ).includes("Choose valid semester dates."),
   );
   assert.ok(
-    importErrors("", bean.semester, []).includes("Add your friend’s nickname."),
+    scheduleErrors("", bean.semester!, []).includes(
+      "Add your friend’s nickname.",
+    ),
   );
   assert.ok(
-    importErrors("Bean", bean.semester, []).includes("Add at least one class."),
+    scheduleErrors("Bean", bean.semester!, []).includes(
+      "Add at least one class.",
+    ),
   );
 });
 test("realistically complete sample validates and overlap detection is day-aware", () => {
-  assert.deepEqual(importErrors("Bean", bean.semester, bean.sessions), []);
+  assert.deepEqual(scheduleErrors("Bean", bean.semester!, bean.sessions), []);
   assert.equal(overlapCount(bean.sessions), 0);
   assert.equal(overlapCount(friends.find((f) => f.id === "oak")!.sessions), 1);
 });

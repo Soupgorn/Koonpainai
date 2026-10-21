@@ -1,36 +1,28 @@
 import { spawn } from "node:child_process";
 import assert from "node:assert/strict";
+import { osEnvironment } from "../runtime/secrets.mjs";
 import { request as httpRequest } from "node:http";
 const base = "http://127.0.0.1:3200",
   canonical = "https://app.example";
-const child = spawn(
-  process.execPath,
-  [
-    "node_modules/next/dist/bin/next",
-    "start",
-    "--hostname",
-    "127.0.0.1",
-    "--port",
-    "3200",
-  ],
-  {
-    stdio: "ignore",
-    env: {
-      ...process.env,
-      NODE_ENV: "production",
-      ENABLE_UI_PREVIEW: "true",
-      ENABLE_ADMIN_DEMO: "true",
-      AUTH_URL: canonical,
-      AUTH_REDIRECT_PROXY_URL: "",
-      AUTH_SECRET: "production-smoke-fixture-secret-at-least-32-characters",
-      AUTH_KEYCLOAK_ID: "fixture-client",
-      AUTH_KEYCLOAK_SECRET: "fixture-secret",
-      AUTH_KEYCLOAK_ISSUER: "https://sso.kmitl.ac.th/realms/kmitl",
-      DATABASE_URL: "postgres://fixture:fixture@127.0.0.1:1/fixture",
-      DIRECT_DATABASE_URL: "",
-    },
+const child = spawn(process.execPath, [".next/standalone/server.js"], {
+  stdio: "ignore",
+  env: {
+    ...osEnvironment(),
+    NODE_ENV: "production",
+    PORT: "3200",
+    HOSTNAME: "127.0.0.1",
+    ENABLE_UI_PREVIEW: "true",
+    ENABLE_ADMIN_DEMO: "true",
+    AUTH_URL: canonical,
+    AUTH_REDIRECT_PROXY_URL: "",
+    AUTH_SECRET: "production-smoke-fixture-secret-at-least-32-characters",
+    AUTH_KEYCLOAK_ID: "fixture-client",
+    AUTH_KEYCLOAK_SECRET: "fixture-secret",
+    AUTH_KEYCLOAK_ISSUER: "https://sso.kmitl.ac.th/realms/kmitl",
+    DATABASE_URL: "postgres://fixture:fixture@127.0.0.1:1/fixture",
+    DIRECT_DATABASE_URL: "",
   },
-);
+});
 function request(path, headers = {}) {
   // Node fetch normalizes Host to its URL. Simulate TLS termination explicitly
   // with node:http so the canonical external Host reaches the loopback server.

@@ -52,7 +52,11 @@ export function daySessions(friend: Friend, day: number) {
 export function getAvailability(friend: Friend, now: Date): Availability {
   const local = localParts(now);
   const empty = { current: [], next: null, freeAt: null };
-  if (!friend.sessions.length || !friend.published)
+  if (
+    !friend.semester ||
+    (!friend.sessions.length && !friend.timetable) ||
+    !friend.published
+  )
     return { kind: "no-schedule", ...empty };
   let next: Occurrence | null = null;
   const firstDate =
