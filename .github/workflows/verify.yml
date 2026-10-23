@@ -1,0 +1,59 @@
+name: Verify Koonpinai
+on:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  application:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      RUN_AUTH_DB_TESTS: 'false'
+      RUN_DATABASE_TLS_TESTS: 'true'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.11.1'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npx playwright install chromium
+      - run: npm run test:e2e
+      - run: node scripts/build-runtime-artifact.mjs
+      - run: git diff --check
+  containers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.11.1'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Validate Compose without starting services
+        env:
+          KOONPINAI_WEB_IMAGE: koonpinai-ci:web
+          KOONPINAI_TOOLS_IMAGE: koonpinai-ci:tools
+          KOONPINAI_POSTGRES_TLS_DIR: /tmp/ci-tls
+          KOONPINAI_POSTGRES_ADMIN_DIR: /tmp/ci-admin
+          KOONPINAI_WEB_SECRET_DIR: /tmp/ci-runtime
+          KOONPINAI_OPERATOR_SECRET_DIR: /tmp/ci-operator
+          KOONPINAI_BACKUP_DIR: /tmp/ci-backups
+          KOONPINAI_BACKUP_REPLICA_DIR: /tmp/ci-replica
+        run: docker compose -f operations/selfhost/compose.yaml config --quiet
+      - name: Native PostgreSQL 17 inside isolated verification image
+        run: node scripts/rehearse-selfhost-docker.mjs
+      - name: Exact production Compose with generated synthetic data only
+        run: npm run test:staging:compose
+      # No production secrets, cloud access, image publication or deployment.

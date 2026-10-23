@@ -11,7 +11,7 @@ if(existsSync(out))throw Error('NEW_OUTPUT_DIRECTORY_REQUIRED');
 mkdirSync(out,{recursive:true});const build=join(out,'build');mkdirSync(build);
 const inputs=['src','public','runtime','scripts/package-runtime.mjs','package.json','package-lock.json','next.config.ts','tsconfig.json','postcss.config.mjs'];
 const hash=createHash('sha256');
-function digest(dir,rel){for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const f=join(dir,e.name),r=rel+'/'+e.name;if(e.isDirectory())digest(f,r);else hash.update(r).update(readFileSync(f));}}
+function digest(dir,rel){for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0)){const f=join(dir,e.name),r=rel+'/'+e.name;if(e.isDirectory())digest(f,r);else hash.update(r).update(readFileSync(f));}}
 for(const p of inputs){const f=join(source,p);if(!existsSync(f))continue;cpSync(f,join(build,p),{recursive:true,filter:f=>!/(^|[\\/])vendor([\\/]|$)|\.pdf$/i.test(f)});if(readdirSync(source).includes(p)&&!p.includes('.') )digest(join(build,p),p);else if(!['src','public','runtime'].includes(p))hash.update(p).update(readFileSync(join(build,p)));}
 const sourceSha256=hash.digest('hex');
 const env={...osEnvironment(),NODE_ENV:'production',NEXT_TELEMETRY_DISABLED:'1',KOONPINAI_BUILD_ID:sourceSha256.slice(0,32)};

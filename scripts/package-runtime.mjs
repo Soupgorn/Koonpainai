@@ -30,5 +30,5 @@ export function packageRuntime(build, output) {
 }
 if(process.argv[1]&&resolve(process.argv[1])===resolve(import.meta.filename)){
   try{if(process.argv.length!==3)throw Error();console.log(JSON.stringify(packageRuntime(process.cwd(),resolve(process.argv[2]))));}
-  catch{console.error('Runtime artifact packaging rejected.');process.exitCode=1;}
+  catch(error){const code=error instanceof Error&&/^[A-Z0-9_]+$/.test(error.message)?error.message:typeof error?.code==='string'&&/^[A-Z0-9_]+$/.test(error.code)?error.code:'ARTIFACT_PACKAGING_FAILED';console.error(JSON.stringify({status:'FAIL',code}));process.exitCode=1;}
 }

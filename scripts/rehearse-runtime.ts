@@ -11,12 +11,13 @@ import {encode} from 'next-auth/jwt';
 import {assertLocalCanaryTarget,ISOLATED_MARKER} from './phase3-canary';
 import {loadRuntimeEnvironment,validateRuntimeUrl,osEnvironment} from '../runtime/secrets.mjs';
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
-type Options={owner:Pool;config:PoolConfig;url:string;caFile:string;root:string;secretRoot:string;artifact:string;rollbackArtifact:string};
+type Options={owner:Pool;config:PoolConfig;url:string;caFile:string;root:string;secretRoot:string;artifact:string;rollbackArtifact:string;selfHosted?:boolean};
 export async function rehearseRuntime(o:Options){
   assertLocalCanaryTarget(o.config.host,o.config.port,o.config.database);
   assert.equal(readFileSync(join(o.root,'created-for-isolated-verification.marker'),'utf8'),ISOLATED_MARKER);
   assert.equal(resolve((await o.owner.query('SHOW data_directory')).rows[0].data_directory),resolve(o.root,'data'));
-  validateRuntimeUrl(o.url,{isolated:true});
+  const u=new URL(o.url),databaseEndpoint={kind:'self-hosted',host:u.hostname,port:Number(u.port||5432),database:u.pathname.slice(1)};
+  validateRuntimeUrl(o.url,{isolated:!o.selfHosted,endpoint:o.selfHosted?databaseEndpoint:undefined});
   const checks:string[]=[];const children:ChildProcess[]=[];
   const baseline=(await o.owner.query("SELECT md5(coalesce(jsonb_agg(to_jsonb(t) ORDER BY id)::text,'[]')) AS digest FROM public.members t")).rows[0].digest;
   const pool=new Pool(o.config);
@@ -34,10 +35,10 @@ export async function rehearseRuntime(o:Options){
     checks.push('Failed awaited connection initializer destroys the client and never leases it');
   }finally{if(!pool.ended)await pool.end();}
   const authSecret='public-fictional-runtime-rehearsal-auth-secret-unchanged';
-  for(const [name,value] of [['database',o.url],['auth',authSecret],['oidc','public-fictional-oidc-client-secret']])writeFileSync(join(o.secretRoot,name+'.secret'),value,{flag:'wx'});
+  for(const [name,value] of [['database',o.url],['auth',authSecret],['oidc','public-fictional-oidc-client-secret']])writeFileSync(join(o.secretRoot,name+'.secret'),value,{flag:'wx',mode:0o600});
   const artifactSha=(artifact:string)=>createHash('sha256').update(readFileSync(join(artifact,'runtime-artifact.json'))).digest('hex');
-  function manifest(artifact:string,port:number,healthPort:number){return{version:1,artifactSha256:artifactSha(artifact),authUrl:'https://app.example/',clientId:'fictional-client',database:{file:join(o.secretRoot,'database.secret'),format:'text'},authSecret:{file:join(o.secretRoot,'auth.secret'),format:'text'},clientSecret:{file:join(o.secretRoot,'oidc.secret'),format:'text'},caFile:o.caFile,port,healthPort,host:'127.0.0.1',shutdownMs:30000};}
-  function environment(artifact:string,port:number,healthPort:number){const file=join(o.secretRoot,'manifest-'+randomUUID()+'.json');writeFileSync(file,JSON.stringify(manifest(artifact,port,healthPort)),{flag:'wx'});return loadRuntimeEnvironment(file,artifact,{isolated:true});}
+  function manifest(artifact:string,port:number,healthPort:number){return{version:1,artifactSha256:artifactSha(artifact),authUrl:'https://app.example/',clientId:'fictional-client',database:{file:join(o.secretRoot,'database.secret'),format:'text'},...(o.selfHosted?{databaseEndpoint}:{}),authSecret:{file:join(o.secretRoot,'auth.secret'),format:'text'},clientSecret:{file:join(o.secretRoot,'oidc.secret'),format:'text'},caFile:o.caFile,port,healthPort,host:'127.0.0.1',shutdownMs:30000};}
+  function environment(artifact:string,port:number,healthPort:number){const file=join(o.secretRoot,'manifest-'+randomUUID()+'.json');writeFileSync(file,JSON.stringify(manifest(artifact,port,healthPort)),{flag:'wx'});return loadRuntimeEnvironment(file,artifact,{isolated:!o.selfHosted});}
   const env=environment(o.artifact,3330,3331);
   for(const k of Object.keys(env))assert.ok(!/^(MIGRATION_|DIRECT_DATABASE_|PG|SUPABASE_)/i.test(k));
   assert.equal(env.DATABASE_POOL_MAX,'2');assert.equal(env.ENABLE_UI_PREVIEW,undefined);
@@ -50,7 +51,8 @@ export async function rehearseRuntime(o:Options){
     const textPath=join(o.secretRoot,'fixture-dpapi-text.json');writeFileSync(textPath,JSON.stringify(textManifest),{flag:'wx'});
     assert.equal(loadRuntimeEnvironment(textPath,o.artifact,{isolated:true}).DATABASE_URL,o.url);
     const payloadFile=join(o.secretRoot,'fixture-runtime-payload.dpapi');writeFileSync(payloadFile,protect(JSON.stringify({version:1,role:'koonpinai_runtime',password:String(o.config.password)})),{flag:'wx'});
-    const payloadManifest={...manifest(o.artifact,3330,3331),database:{file:payloadFile,format:'dpapi-runtime-v1'},databaseTarget:{host:'fictional.pooler.supabase.com',database:'postgres',user:'koonpinai_runtime.fictional'}};
+    const {databaseEndpoint:_endpoint,...hostedManifest}=manifest(o.artifact,3330,3331);void _endpoint;
+    const payloadManifest={...hostedManifest,database:{file:payloadFile,format:'dpapi-runtime-v1'},databaseTarget:{host:'fictional.pooler.supabase.com',database:'postgres',user:'koonpinai_runtime.fictional'}};
     const payloadPath=join(o.secretRoot,'fixture-dpapi-payload.json');writeFileSync(payloadPath,JSON.stringify(payloadManifest),{flag:'wx'});
     const recovered=loadRuntimeEnvironment(payloadPath,o.artifact);assert.equal(new URL(recovered.DATABASE_URL!).password,String(o.config.password));
     // Format conversion is in-memory only; the fictional hosted URL is NEVER connected.
@@ -61,6 +63,7 @@ export async function rehearseRuntime(o:Options){
   let fixtureCreated=false;
   async function start(artifact:string,e:NodeJS.ProcessEnv,expectReady=true){
     let executable=join(artifact,'runtime/server.mjs');
+    let argumentsForChild:string[]=[];
     let childEnv=e;
     if(existsSync(join(artifact,'runtime/supervise.mjs'))){
       const store=join(o.secretRoot,'launch-'+randomUUID());mkdirSync(store,{mode:0o700});
@@ -68,11 +71,12 @@ export async function rehearseRuntime(o:Options){
       for(const [name,value] of [['database',e.DATABASE_URL!],['auth',e.AUTH_SECRET!],['oidc',e.AUTH_KEYCLOAK_SECRET!],['ca.crt',readFileSync(o.caFile,'utf8')]]){const f=join(store,name);writeFileSync(f,value,{flag:'wx'});if(process.platform!=='win32')chmodSync(f,0o400);}
       const m={...manifest(artifact,Number(e.PORT),Number(e.KOONPINAI_HEALTH_PORT)),database:{file:join(store,'database'),format:'text'},authSecret:{file:join(store,'auth'),format:'text'},clientSecret:{file:join(store,'oidc'),format:'text'},caFile:join(store,'ca.crt')};
       const mf=join(store,'manifest.json');writeFileSync(mf,JSON.stringify(m),{flag:'wx'});
-      executable=join(o.secretRoot,'fixture-supervisor-'+randomUUID()+'.mjs');
-      writeFileSync(executable,`import {supervise} from ${JSON.stringify(pathToFileURL(join(artifact,'runtime/supervise.mjs')).href)};import {loadRuntimeEnvironment,assertRuntimeSecretDirectory} from ${JSON.stringify(pathToFileURL(join(artifact,'runtime/secrets.mjs')).href)};assertRuntimeSecretDirectory(${JSON.stringify(mf)});supervise(${JSON.stringify(artifact)},loadRuntimeEnvironment(${JSON.stringify(mf)},${JSON.stringify(artifact)},{isolated:true}));`,{flag:'wx'});
+      if(o.selfHosted){executable=join(artifact,'runtime/launch.mjs');argumentsForChild=[mf];}
+      else{executable=join(o.secretRoot,'fixture-supervisor-'+randomUUID()+'.mjs');
+       writeFileSync(executable,`import {supervise} from ${JSON.stringify(pathToFileURL(join(artifact,'runtime/supervise.mjs')).href)};import {loadRuntimeEnvironment,assertRuntimeSecretDirectory} from ${JSON.stringify(pathToFileURL(join(artifact,'runtime/secrets.mjs')).href)};assertRuntimeSecretDirectory(${JSON.stringify(mf)});supervise(${JSON.stringify(artifact)},loadRuntimeEnvironment(${JSON.stringify(mf)},${JSON.stringify(artifact)},{isolated:true}));`,{flag:'wx'});}
       childEnv={...osEnvironment(),NODE_ENV:'production'};
     }
-    const child=spawn(process.execPath,[executable],{cwd:artifact,env:childEnv,windowsHide:true,stdio:['ignore','pipe','pipe','ipc']});children.push(child);
+    const child=spawn(process.execPath,[executable,...argumentsForChild],{cwd:artifact,env:childEnv,windowsHide:true,stdio:['ignore','pipe','pipe','ipc']});children.push(child);
     let logs='';for(const s of [child.stdout,child.stderr])s?.on('data',b=>{logs+=b.toString();if(logs.length>50000)logs=logs.slice(-50000);});
     const exited=new Promise<number|null>(ok=>child.once('exit',code=>ok(code)));
     const ready=new Promise<void>((ok,fail)=>{const timer=setTimeout(()=>fail(Error('ISOLATED_STARTUP_TIMEOUT')),45000);child.on('message',(m:unknown)=>{if((m as {event?:string}).event==='ready'){clearTimeout(timer);ok();}});child.once('exit',()=>{clearTimeout(timer);const code=logs.match(/Startup rejected \(([A-Z0-9_]+)\)/)?.[1]??'UNKNOWN';fail(Error('ISOLATED_STARTUP_'+code));});});
@@ -99,6 +103,13 @@ export async function rehearseRuntime(o:Options){
     const bad={...environment(o.artifact,3340,3341),DATABASE_URL:o.url.replace(encodeURIComponent(String(o.config.password)),'public-wrong-fixture-password')};
     const failed=await start(o.artifact,bad,false);assert.equal(failed.rejectionCode,'28P01');assert.equal((await http(3330,'/login')).status,200);
     checks.push('Failed candidate authentication never opens traffic; previous healthy process remains available');
+    if(o.selfHosted){
+      await o.owner.query('ALTER TABLE public.timetable_entries NO FORCE ROW LEVEL SECURITY');
+      try{const unready=await start(o.artifact,environment(o.artifact,3340,3341),false);assert.equal(unready.rejectionCode,'DATABASE_TIMETABLE_SCHEMA_UNREADY');}
+      finally{await o.owner.query('ALTER TABLE public.timetable_entries FORCE ROW LEVEL SECURITY');}
+      assert.equal((await http(3331,'/ready')).status,200);
+      checks.push('Candidate refuses timetable RLS drift before opening traffic; restored invariant returns readiness without data changes');
+    }
     const held=await o.owner.connect();
     try{
       await held.query('BEGIN');await held.query('LOCK TABLE public.application_sessions IN ACCESS EXCLUSIVE MODE');
@@ -120,5 +131,5 @@ export async function rehearseRuntime(o:Options){
     for(const child of children)if(child.exitCode===null){child.kill();throw Error('ISOLATED_CHILD_DID_NOT_DRAIN');}
     if(fixtureCreated){const c=await o.owner.connect();try{await c.query('BEGIN');await c.query('DELETE FROM public.application_sessions WHERE id=$1 AND member_id=$2',[sid,memberId]);assert.equal((await c.query('DELETE FROM public.members WHERE id=$1 AND oidc_subject=$2',[memberId,subject])).rowCount,1);assert.equal((await c.query("SELECT md5(coalesce(jsonb_agg(to_jsonb(t) ORDER BY id)::text,'[]')) AS digest FROM public.members t")).rows[0].digest,baseline);await c.query('COMMIT');}catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}}
   }
-  return{checks,checkCount:checks.length,status:'PASS',realNext:true,realPostgres:true,realOidc:false,syntheticCookie:true,productionConnected:false,rollbackDistinctArtifact:artifactSha(o.artifact)!==artifactSha(o.rollbackArtifact),signalMechanism:process.platform==='win32'?'IPC invokes same shutdown handler; POSIX SIGTERM not tested':'SIGTERM',dockerTested:false};
+  return{checks,checkCount:checks.length,status:'PASS',realNext:true,realPostgres:true,realOidc:false,syntheticCookie:true,productionConnected:false,productionLauncher:o.selfHosted??false,rollbackDistinctArtifact:artifactSha(o.artifact)!==artifactSha(o.rollbackArtifact),signalMechanism:process.platform==='win32'?'IPC invokes same shutdown handler; POSIX SIGTERM not tested':'SIGTERM',dockerTested:false};
 }

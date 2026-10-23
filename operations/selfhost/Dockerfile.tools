@@ -1,0 +1,28 @@
+FROM node:24-bookworm-slim@sha256:8cabefbd444809cf0e319b5831c65da1ea202200ca552a5e75fd7938a6f86658 AS dependencies
+WORKDIR /tool
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts --no-audit --no-fund
+FROM postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27 AS tools
+COPY --from=dependencies /usr/local/bin/node /usr/local/bin/node
+WORKDIR /tool
+COPY --from=dependencies /tool/node_modules ./node_modules
+COPY package.json tsconfig.json ./
+COPY src ./src
+COPY scripts ./scripts
+COPY runtime ./runtime
+COPY drizzle ./drizzle
+COPY operations/selfhost ./operations/selfhost
+RUN groupadd --gid 1002 koonpinai_operator && useradd --uid 1002 --gid koonpinai_operator --no-create-home koonpinai_operator
+USER 1002:1002
+ENTRYPOINT ["node", "node_modules/tsx/dist/cli.mjs", "scripts/portable-database.ts"]
+
+# Test-only target. Browser/OS packages never enter the production web/tools target.
+FROM tools AS verification
+COPY operations/runtime-role.PROPOSED.sql operations/student-timetables.rollback.PROPOSED.sql ./operations/
+USER root
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+    && node node_modules/playwright/cli.js install --with-deps chromium
+COPY tests/fixtures ./tests/fixtures
+USER 1002:1002

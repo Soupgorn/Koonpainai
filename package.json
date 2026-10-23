@@ -18,6 +18,10 @@
     "db:audit": "tsx scripts/database-readiness.ts",
     "db:backup": "tsx scripts/database-backup.ts",
     "db:verify-recovery": "tsx scripts/verify-database-recovery.ts",
+    "db:portable": "tsx scripts/portable-database.ts",
+    "test:selfhost": "tsx scripts/rehearse-selfhost.ts",
+    "test:selfhost:docker": "node scripts/rehearse-selfhost-docker.mjs",
+    "test:staging:compose": "tsx scripts/rehearse-compose.ts --approve-isolated-writes",
     "db:migrate": "tsx scripts/account-db.ts migrate",
     "users:promote-admin": "tsx scripts/account-db.ts promote-admin"
   },

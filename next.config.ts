@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   output: "standalone",
   generateBuildId: async () => process.env.KOONPINAI_BUILD_ID ?? null,
   devIndicators: false,
+  // Clean CI/container builds do not reuse .next/cache. Avoid retaining and
+  // serializing a Turbopack cache alongside the TypeScript build worker.
+  experimental: {
+    turbopackFileSystemCacheForBuild: false,
+    webpackMemoryOptimizations: true,
+  },
   // Callback query strings and Server Action arguments contain private data.
   logging: false,
   async headers() {

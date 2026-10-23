@@ -2,7 +2,9 @@
 
 Students maintain their own weekly timetables and see approved friends’ availability in **Asia/Bangkok**. Availability comes from class schedules, never GPS or attendance.
 
-Next.js 16 App Router, TypeScript, Tailwind/shadcn, Auth.js + KMITL Keycloak, Supabase PostgreSQL, Drizzle and Zod. **Database-first:** no external timetable provider, PDF/OCR or Supabase Auth.
+Next.js 16 App Router, TypeScript, Tailwind/shadcn, Auth.js + KMITL Keycloak, PostgreSQL, Drizzle and Zod. The active hosted database remains Supabase; a separate self-hosted PostgreSQL17 environment is prepared locally. **Database-first:** no external timetable provider, PDF/OCR or Supabase Auth.
+
+Latest [release-readiness evidence](RELEASE_READINESS.md): private synthetic CloudStack functional tests passed. October 23 management checks passed on five fresh key-only SSH connections over 147 seconds; the tested application stack remains intentionally stopped after cleanup. An earlier failed probe is retained in the evidence. Production migration and cutover remain NO-GO. The sealed candidate/rollback images passed the actual Linux Compose rehearsal. Offsite recovery is deferred by the owner for disposable staging data only. See the [manual CloudStack firewall checklist and console diagnostics](operations/release/firewall-review.PLAN.md); no firewall settings were changed.
 
 ## Run locally
 
@@ -69,7 +71,19 @@ The normal browser suite is credential-free on port3100. Do not substitute the p
 
 The managed launcher uses a max2 pool, awaited Session timeouts, exact-role/RLS readiness, a runtime-only external secret directory, pinned artifacts and graceful HTTP/Next/pool shutdown. No startup migration or automatic owner fallback exists. Windows DPAPI is not portable Linux secret storage. The proposed Docker/Compose configuration is not an executed production deployment.
 
-Phase3 runtime cutover remains NO-GO pending target Linux/container lifecycle tests, actual production rollback artifacts, capacity bounds, provider transport assurance and approved production canaries. See [deployment/migration boundaries](DATABASE_FIRST.md). Existing backup/security assessments are historical evidence; this timetable migration requires a new review. Do not deploy, migrate or change production credentials merely because this code builds.
+Self-hosted deployment/cutover remains NO-GO pending Linux/container lifecycle tests, independently delivered backup keys/off-VM recovery, fresh final source backup and approved production canaries. See [self-hosted PostgreSQL operations](SELF_HOSTED_POSTGRES.md) for Compose, separate runtime/migration/admin identities, portable encrypted backup/restore, connection budget and freeze/rollback procedures. [Post-merge readiness](POST_MERGE_READINESS.md) records current evidence and limits. Existing backup/security assessments remain historical evidence; do not deploy, migrate or change production credentials merely because this code builds.
+
+### Isolated PostgreSQL verification
+
+```text
+npm run db:portable -- audit --config=<external-private-readonly-config>
+npm run test:selfhost -- --pg-bin=<existing-PG17-bin> --artifact=<secret-free-artifact> --approve-isolated-writes
+npm run test:selfhost:docker
+```
+
+The native helper creates new loopback-only source/target databases with synthetic identities, verifies encrypted backup/restore and application authorization, then stops both clusters. It never loads dotenv. Use only approved existing PostgreSQL binaries; no system installation is automatic. The Docker helper requires Linux Docker and uses disposable labelled resources. It is not a production executor. CI validates pull requests with synthetic data and no production secrets; it neither publishes images nor deploys.
+
+See [Linux staging verification](LINUX_STAGING_VERIFICATION.md) for actual Ubuntu Docker installation and synthetic Compose, migration, authorization, shutdown and portable recovery results. `npm run test:staging:compose` uses independent recovery volumes and refuses remote Docker contexts. Earlier [readiness evidence](LINUX_STAGING_READINESS.md) is preserved as history. Production migration and cutover remain unapproved.
 
 ## Brand assets and merge review
 

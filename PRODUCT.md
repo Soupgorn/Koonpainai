@@ -20,6 +20,8 @@ Availability is calculated from recurring academic timetables in Asia/Bangkok. I
 ## Operating Context
 Quick mobile checks between classes and weekly planning on larger screens. The Cloud & Sky interface uses compact search/filter workspaces, readable schedule rows and honest empty states. English interface copy and Thai names are supported; the official application name is always Koonpinai.
 
+The current hosted PostgreSQL connection remains unchanged. A separate self-hosted PostgreSQL17/Compose path and portable encrypted backup tools are prepared for future CloudStack staging. They do not enable deployment, run migrations at startup, or change the student-sharing policy. See [self-hosted operations](SELF_HOSTED_POSTGRES.md) and [post-merge evidence](POST_MERGE_READINESS.md).
+
 ## Capabilities and Constraints
 The directory and friend schedules require an approved account with the current policy acknowledgement and completed profile. Students set their semester and maintain their own classes through authenticated Server Actions. Ownership comes only from the validated Auth.js session. Administrators manage approvals and cannot edit another student’s classes. Pending students may prepare a private timetable after profile/policy setup; suspended users cannot edit. The server-only repository exposes fictional friends only in explicit credential-free development preview. Preserve exact class boundaries, semester dates, empty days and overlaps; missing schedules are not evidence of free time.
 

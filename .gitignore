@@ -26,5 +26,10 @@ Thumbs.db
 # Private database recovery material and account-reference evidence.
 *.dump
 *.dpapi
+*.dump.enc
+*.backup-key.json
+*.pgkey
+pgdata/
+secrets/
 *.pgpass
 operations/account-reference*.json

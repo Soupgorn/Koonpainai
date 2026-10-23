@@ -14,16 +14,16 @@ import { POLICY_VERSION } from "../src/lib/auth/domain";
 import { assertLocalCanaryTarget, ISOLATED_MARKER } from "./phase3-canary";
 import { osEnvironment } from "../runtime/secrets.mjs";
 
-export async function rehearseStudentBrowser(o: { owner: Pool; root: string; artifact: string; secretRoot: string; url: string; caFile: string }) {
+export async function rehearseStudentBrowser(o: { owner: Pool; root: string; artifact: string; secretRoot: string; url: string; caFile: string; selfHosted?: boolean }) {
   assertLocalCanaryTarget(o.owner.options.host, o.owner.options.port, o.owner.options.database);
   assert.equal(readFileSync(join(o.root, "created-for-isolated-verification.marker"), "utf8"), ISOLATED_MARKER);
   assert.equal(resolve((await o.owner.query("SHOW data_directory")).rows[0].data_directory), resolve(o.root, "data"));
   const target = new URL(o.url); assert.equal(target.hostname, "127.0.0.1"); assert.equal(target.username, "koonpinai_runtime");
   const ids = [randomUUID(), randomUUID(), randomUUID()], sids = ids.map(() => randomUUID()), subjects = ids.map(() => "browser-fixture-" + randomUUID());
   const secret = "PUBLIC-fictional-browser-auth-secret-".repeat(3);
-  for (const [name, value] of [["database", o.url], ["auth", secret], ["oidc", "PUBLIC-fictional-browser-client"], ["ca.crt", readFileSync(o.caFile, "utf8")]]) writeFileSync(join(o.secretRoot, name), value, { flag: "wx" });
-  const manifest = { version: 1, artifactSha256: createHash("sha256").update(readFileSync(join(o.artifact, "runtime-artifact.json"))).digest("hex"), authUrl: "https://app.example/", clientId: "fixture-client", database: { file: join(o.secretRoot, "database"), format: "text" }, authSecret: { file: join(o.secretRoot, "auth"), format: "text" }, clientSecret: { file: join(o.secretRoot, "oidc"), format: "text" }, caFile: join(o.secretRoot, "ca.crt"), port: 3340, healthPort: 3341, host: "127.0.0.1", shutdownMs: 30000 };
-  const mf = join(o.secretRoot, "manifest.json"); writeFileSync(mf, JSON.stringify(manifest), { flag: "wx" });
+  for (const [name, value] of [["database", o.url], ["auth", secret], ["oidc", "PUBLIC-fictional-browser-client"], ["ca.crt", readFileSync(o.caFile, "utf8")]]) writeFileSync(join(o.secretRoot, name), value, { flag: "wx", mode: 0o600 });
+  const manifest = { version: 1, artifactSha256: createHash("sha256").update(readFileSync(join(o.artifact, "runtime-artifact.json"))).digest("hex"), authUrl: "https://app.example/", clientId: "fixture-client", database: { file: join(o.secretRoot, "database"), format: "text" }, ...(o.selfHosted ? {databaseEndpoint:{kind:'self-hosted',host:target.hostname,port:Number(target.port),database:target.pathname.slice(1)}} : {}), authSecret: { file: join(o.secretRoot, "auth"), format: "text" }, clientSecret: { file: join(o.secretRoot, "oidc"), format: "text" }, caFile: join(o.secretRoot, "ca.crt"), port: 3340, healthPort: 3341, host: "127.0.0.1", shutdownMs: 30000 };
+  const mf = join(o.secretRoot, "manifest.json"); writeFileSync(mf, JSON.stringify(manifest), { flag: "wx", mode: 0o600 });
   const helper = join(o.root, "fixture-browser-supervisor.mjs");
   writeFileSync(helper, `import {supervise} from ${JSON.stringify(pathToFileURL(join(o.artifact, "runtime/supervise.mjs")).href)};import {loadRuntimeEnvironment,assertRuntimeSecretDirectory} from ${JSON.stringify(pathToFileURL(join(o.artifact, "runtime/secrets.mjs")).href)};assertRuntimeSecretDirectory(${JSON.stringify(mf)});supervise(${JSON.stringify(o.artifact)},loadRuntimeEnvironment(${JSON.stringify(mf)},${JSON.stringify(o.artifact)},{isolated:true}));`, { flag: "wx" });
   const before = (await o.owner.query("SELECT md5(coalesce(jsonb_agg(to_jsonb(m) order by id)::text,'[]')) digest FROM public.members m")).rows[0].digest;
@@ -31,7 +31,7 @@ export async function rehearseStudentBrowser(o: { owner: Pool; root: string; art
     await o.owner.query("INSERT INTO public.members(id,oidc_issuer,oidc_subject,display_name,nickname,department,profile_completed_at,policy_version,policy_accepted_at,status) VALUES($1,'https://sso.kmitl.ac.th/realms/kmitl',$2,'Synthetic browser',$3,'Synthetic',now(),$4,now(),$5)", [ids[i], subjects[i], ["Browser A", "Browser B", "Pending fixture"][i], POLICY_VERSION, i === 2 ? "pending" : "approved"]);
     await o.owner.query("INSERT INTO public.application_sessions(id,member_id,expires_at) VALUES($1,$2,now()+interval '1 hour')", [sids[i], ids[i]]);
   }
-  const child = spawn(process.execPath, [helper], { cwd: o.artifact, env: { ...osEnvironment(), NODE_ENV: "production" }, windowsHide: true, stdio: ["ignore", "pipe", "pipe", "ipc"] });
+  const child = spawn(process.execPath, o.selfHosted ? [join(o.artifact,"runtime/launch.mjs"),mf] : [helper], { cwd: o.artifact, env: { ...osEnvironment(), NODE_ENV: "production" }, windowsHide: true, stdio: ["ignore", "pipe", "pipe", "ipc"] });
   let logs = ""; for (const stream of [child.stdout, child.stderr]) stream?.on("data", b => { logs += b.toString(); });
   const exit = new Promise<number | null>(ok => child.once("exit", ok));
   let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
@@ -93,5 +93,5 @@ export async function rehearseStudentBrowser(o: { owner: Pool; root: string; art
     await o.owner.query("DELETE FROM public.members WHERE id=ANY($1::uuid[]) AND oidc_subject=ANY($2::text[])", [ids, subjects]);
     assert.equal((await o.owner.query("SELECT md5(coalesce(jsonb_agg(to_jsonb(m) order by id)::text,'[]')) digest FROM public.members m")).rows[0].digest, before);
   }
-  return { status: "PASS", checks, count: checks.length, realNext: true, realServerActions: true, realRestrictedPostgres: true, realOidc: false, syntheticSession: true, productionConnected: false, fixturesCleaned: true, runtimeDrained: true };
+  return { status: "PASS", checks, count: checks.length, realNext: true, realServerActions: true, realRestrictedPostgres: true, realOidc: false, syntheticSession: true, productionConnected: false, productionLauncher: o.selfHosted??false, fixturesCleaned: true, runtimeDrained: true };
 }

@@ -2,9 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { Client } from "pg";
 import type { PoolClient } from "pg";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, dirname, basename, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { createServer, connect, type ConnectionOptions } from "node:tls";
 import { once } from "node:events";
@@ -243,7 +243,13 @@ test(
           databaseErrorCode(error) === "ERR_TLS_CERT_ALTNAME_INVALID",
       );
     } finally {
-      await new Promise<void>((done) => server.close(() => done()));
+      try {
+        await new Promise<void>((done) => server.close(() => done()));
+      } finally {
+        assert.equal(dirname(resolve(directory)), resolve(tmpdir()));
+        assert.ok(basename(directory).startsWith("koonpinai-tls-"));
+        rmSync(directory, { recursive: true, force: true });
+      }
     }
   },
 );

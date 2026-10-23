@@ -4,7 +4,7 @@
 
 Verified locally on 21 October 2026. This milestone prepares an API-first boundary; **no university timetable request or successful live synchronization exists**.
 
-Later TLS, backup, grants and isolated migration verification are in [MIGRATION_READINESS.md](MIGRATION_READINESS.md). That work hardens the still-unapplied `0002`; its current checksum and production NO-GO decision supersede the earlier migration review below.
+Historical TLS, backup, grants and isolated migration notes were recorded in local `MIGRATION_READINESS.md`, which is not distributed in this checkout. Current execution guidance is [DATABASE_FIRST.md](DATABASE_FIRST.md) and [SELF_HOSTED_POSTGRES.md](SELF_HOSTED_POSTGRES.md); the retired API-first migration review below is not current approval.
 
 ## Delivered
 
@@ -64,7 +64,7 @@ The database test also exercised prepared metadata permissions/upserts and inval
 
 ## Screenshots
 
-Local ignored gallery: [.impeccable/review/api-first/index.html](.impeccable/review/api-first/index.html), containing **44 PNGs**. Click a thumbnail for full resolution.
+Historical local ignored gallery: `.impeccable/review/api-first/index.html`, originally containing **44 PNGs**. It is not distributed in this checkout; the descriptions below are historical evidence, not current screenshots.
 
 For each screen below there are `-desktop-light.png`, `-desktop-dark.png`, `-mobile-light.png` and `-mobile-dark.png` variants in that directory:
 
