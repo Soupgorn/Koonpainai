@@ -10,6 +10,7 @@ import {
   type MemberRepository,
 } from "./domain";
 import type { AuthSettings } from "./settings";
+import { authFailureDetails } from "./diagnostics";
 export function createAuthConfig(
   settings: AuthSettings,
   repository: MemberRepository,
@@ -156,8 +157,8 @@ export function createAuthConfig(
     },
     // Never log upstream error objects, causes, tokens, secrets or database URLs.
     logger: {
-      error() {
-        console.error("[auth] Authentication request failed.");
+      error(error) {
+        console.error("[auth]", JSON.stringify(authFailureDetails(error)));
       },
       warn() {
         console.warn("[auth] Configuration notice.");
