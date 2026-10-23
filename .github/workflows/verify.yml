@@ -22,6 +22,10 @@ jobs:
         with:
           node-version: '24.11.1'
           cache: npm
+      - name: Record Node and npm versions
+        run: |
+          node --version
+          npm --version
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run lint
@@ -40,6 +44,12 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '24.11.1'
+      - name: Record container test toolchain
+        run: |
+          node --version
+          npm --version
+          docker version --format 'server={{.Server.Version}} os={{.Server.Os}}'
+          docker compose version
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Validate Compose without starting services
         env:

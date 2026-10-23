@@ -75,12 +75,16 @@ export async function rehearseStudentBrowser(o: { owner: Pool; root: string; art
     await expect(page.getByRole("heading", { name: "Browser A", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Add class", exact: true })).toHaveCount(0); await expect(page.locator(".timetable-event").filter({ hasText: "Persisted seminar" })).toBeVisible();
     await page.goto(`https://app.example/friends/${ids[2]}`); await expect(page.getByRole("heading", { name: "A little off the timetable." })).toBeVisible();
-    await signAs(2); await page.goto("https://app.example/my-timetable"); await expect(page.getByRole("button", { name: "Set semester" })).toBeVisible(); await page.goto("https://app.example/"); await expect(page).toHaveURL(/pending-approval/);
+    await signAs(2); await page.goto("https://app.example/my-timetable"); await expect(page.getByRole("button", { name: "Set semester" })).toBeVisible(); await page.goto("https://app.example/");
+    // Streaming redirects can finish after load while the real production
+    // client hydrates. Wait for the exact navigation, within the proxy's bound.
+    await page.waitForURL(url=>url.origin==='https://app.example'&&url.pathname==='/pending-approval',{timeout:20000});
     checks.push("Authenticated peer can view but has no editor; pending profile hidden and pending dashboard denied while own setup allowed");
     await signAs(0); await page.goto("https://app.example/my-timetable"); await page.locator(".timetable-event").filter({ hasText: "Persisted seminar" }).click(); await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click(); await page.getByRole("button", { name: "Delete class", exact: true }).click(); await expect(page.getByRole("dialog")).not.toBeVisible(); await page.reload();
     assert.equal((await o.owner.query("SELECT count(*)::int n FROM public.timetable_entries WHERE member_id=$1", [ids[0]])).rows[0].n, 0);
     checks.push("Confirmed delete executes real owner-scoped Server Action and remains deleted after reload");
-    await o.owner.query("UPDATE public.application_sessions SET revoked_at=now() WHERE id=$1", [sids[0]]); await page.goto("https://app.example/my-timetable"); await expect(page).toHaveURL(/login/);
+    await o.owner.query("UPDATE public.application_sessions SET revoked_at=now() WHERE id=$1", [sids[0]]); await page.goto("https://app.example/my-timetable");
+    await page.waitForURL(url=>url.origin==='https://app.example'&&url.pathname==='/login',{timeout:20000});
     checks.push("Revoked synthetic Auth.js session cannot reopen the editor");
   } finally {
     await browser?.close();

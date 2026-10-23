@@ -1,7 +1,7 @@
 // New synthetic loopback clusters only. No dotenv, hosted URL, real SSO or deployment.
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,existsSync,copyFileSync} from 'node:fs';
-import {join,resolve} from 'node:path';
+import {join,resolve,basename} from 'node:path';
 import {tmpdir} from 'node:os';
 import {randomUUID} from 'node:crypto';
 import {spawn,execFileSync} from 'node:child_process';
@@ -22,9 +22,10 @@ import {generateBackupKey,hash,outside} from './portable/crypto';
 import {backup,restore,verifyBackup,replicateBackup,projection,pgTool,type DatabaseTarget} from './portable/database';
 import {configureAccess,verifyAccess} from './portable/access';
 import {exerciseSyntheticAccounts,cleanupSyntheticAccounts,requireSyntheticDatabase,stagingFixtureSchema} from './staging/probe';
+import {outputEvidence,rehearsalErrorEvidence} from './tooling/rehearsal-diagnostics.mjs';
 
 const env={...osEnvironment(),NODE_ENV:'test' as const};
-async function tool(exe:string,args:string[],input?:Buffer|string){return new Promise<string>((ok,fail)=>{const c=spawn(exe,args,{env,windowsHide:true,stdio:['pipe','pipe','pipe']});let out='';const t=setTimeout(()=>{c.kill();fail(Error('ISOLATED_TOOL_TIMEOUT'));},120000);c.stdout.on('data',b=>{if(out.length<2e6)out+=b.toString();});c.stderr.resume();c.stdin.on('error',()=>{});c.stdin.end(input);c.on('error',()=>{clearTimeout(t);fail(Error('ISOLATED_TOOL_UNAVAILABLE'));});c.on('exit',code=>{clearTimeout(t);if(code===0)ok(out);else fail(Error('ISOLATED_TOOL_FAILED'));});});}
+async function tool(exe:string,args:string[],input?:Buffer|string){return new Promise<string>((ok,fail)=>{const c=spawn(exe,args,{env,windowsHide:true,stdio:['pipe','pipe','pipe']});let out='',stderr='';const evidence=(exitCode:number|null)=>({program:basename(exe).replace(/\.exe$/i,''),exitCode,...outputEvidence(out,stderr)});const t=setTimeout(()=>{c.kill();fail(Object.assign(Error('ISOLATED_TOOL_TIMEOUT'),{evidence:evidence(null)}));},120000);c.stdout.on('data',b=>{out=(out+b.toString()).slice(-2e6);});c.stderr.on('data',b=>{stderr=(stderr+b.toString()).slice(-16000);});c.stdin.on('error',()=>{});c.stdin.end(input);c.on('error',()=>{clearTimeout(t);fail(Object.assign(Error('ISOLATED_TOOL_UNAVAILABLE'),{evidence:evidence(null)}));});c.on('close',code=>{clearTimeout(t);if(code===0)ok(out);else fail(Object.assign(Error('ISOLATED_TOOL_FAILED'),{evidence:evidence(code)}));});});}
 export type HistoricalArchive={bytes:Buffer;sha256:string;records:{table:string;rows:string;digest:string}[];ledger:{hash:string;created_at:string|number}[]};
 export async function rehearseSelfhost(o:{bin:string;artifact:string;rollbackArtifact?:string;root:string;archiveRoot:string;keyRoot:string;historical?:HistoricalArchive;sourcePortable?:{directory:string;keyFile:string}}){
  for(const p of [o.root,o.archiveRoot,o.keyRoot])if(!outside(p,process.cwd())||existsSync(p))throw Error('NEW_EXTERNAL_ISOLATED_PATH_REQUIRED');
@@ -76,7 +77,9 @@ export async function rehearseSelfhost(o:{bin:string;artifact:string;rollbackArt
   await assert.rejects(br.query('CREATE TABLE public.denied(id int)'));await assert.rejects(br.query('SELECT * FROM drizzle.__drizzle_migrations'));await assert.rejects(br.query('TRUNCATE public.members'));
   assert.equal((await b.admin.query("SELECT count(*)::int n FROM pg_roles WHERE rolname IN('anon','authenticated','service_role','supabase_admin')")).rows[0].n,0);checks.push('No provider roles imported; runtime has no DDL, ledger, truncation, role management or owner privileges');
   ctl(b.root,'stop');await new Promise(r=>setTimeout(r,100));ctl(b.root,'start');assert.equal((await br.query('SELECT current_user role')).rows[0].role,'koonpinai_runtime');const c=await b.admin.connect();try{assert.deepEqual((await projection(c)).tables,archive.manifest.projection.tables);}finally{c.release();}checks.push('PostgreSQL restart preserves full data and the existing runtime pool acquires a new verified TLS connection');
+  console.log(JSON.stringify({stage:'runtime-lifecycle',productionConnected:false}));
   const life=join(o.root,'lifecycle');secureDirectory(life);lifecycle=await rehearseRuntime({owner:b.admin,config:databaseConfig('runtime',{NODE_ENV:'test',DATABASE_URL:target(b.port,'phase3_synthetic','koonpinai_runtime',runtimePassword).url,DATABASE_CA_FILE:ca}),url:target(b.port,'phase3_synthetic','koonpinai_runtime',runtimePassword).url,caFile:ca,root:b.root,secretRoot:life,artifact:o.artifact,rollbackArtifact:o.rollbackArtifact??o.artifact,selfHosted:true});
+  console.log(JSON.stringify({stage:'server-action-browser',productionConnected:false}));
   const browserSecrets=join(o.root,'browser-secrets');secureDirectory(browserSecrets);browser=await rehearseStudentBrowser({owner:b.admin,root:b.root,secretRoot:browserSecrets,artifact:o.artifact,url:target(b.port,'phase3_synthetic','koonpinai_runtime',runtimePassword).url,caFile:ca,selfHosted:true});
   const forged=join(o.archiveRoot,'tampered');secureDirectory(forged);copyFileSync(join(archive.directory,'manifest.json'),join(forged,'manifest.json'));const bytes=readFileSync(join(archive.directory,'application.dump.enc'));bytes[bytes.length-20]^=1;writeFileSync(join(forged,'application.dump.enc'),bytes);await assert.rejects(verifyBackup(forged,backupKey));checks.push('Tampered ciphertext is rejected before decryption or database restore');
   if(o.historical){
@@ -103,6 +106,7 @@ export async function rehearseSelfhost(o:{bin:string;artifact:string;rollbackArt
     sourceSnapshotResult={status:'PASS',createdAt:manifest.createdAt,members:before.tables['public.members'].count,sessions:before.tables['public.application_sessions'].count,allRecordDigestsMatch:true,schemaAndLedgerMatch:true,independentPortableKey:true,isolated0002Applied:before.ledger.length===2,accountRecordsUnchanged:true,productionConnected:false};
    }finally{c.release();}
   }
+  console.log(JSON.stringify({stage:'fresh-migration-rls',productionConnected:false}));
   await b.admin.query('CREATE DATABASE fresh_install');
   const fresh=pool(target(b.port,'fresh_install')),fc=await fresh.connect();try{
    await fc.query('REVOKE ALL ON DATABASE fresh_install FROM PUBLIC; GRANT CONNECT,CREATE ON DATABASE fresh_install TO koonpinai_migrator; REVOKE ALL ON SCHEMA public FROM PUBLIC; GRANT USAGE,CREATE ON SCHEMA public TO koonpinai_migrator');
@@ -132,5 +136,5 @@ export async function rehearseSelfhost(o:{bin:string;artifact:string;rollbackArt
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
  const arg=(k:string)=>process.argv.find(s=>s.startsWith(k+'='))?.slice(k.length+1),bin=arg('--pg-bin'),artifact=arg('--artifact');
  if(!process.argv.includes('--approve-isolated-writes')||!bin||!artifact){console.error('Explicit isolated-write approval, existing PostgreSQL binaries and a built artifact are required.');process.exitCode=1;}
- else{const id=randomUUID(),root=join(tmpdir(),'koonpinai-selfhost-'+id);void rehearseSelfhost({bin:resolve(bin),artifact:resolve(artifact),root,archiveRoot:join(tmpdir(),'koonpinai-portable-archives-'+id),keyRoot:join(tmpdir(),'koonpinai-portable-keys-'+id)}).then(r=>console.log(JSON.stringify(r))).catch(e=>{console.error(JSON.stringify({status:'FAIL',code:databaseErrorCode(e)}));process.exitCode=1;});}
+ else{const id=randomUUID(),root=join(tmpdir(),'koonpinai-selfhost-'+id);void rehearseSelfhost({bin:resolve(bin),artifact:resolve(artifact),root,archiveRoot:join(tmpdir(),'koonpinai-portable-archives-'+id),keyRoot:join(tmpdir(),'koonpinai-portable-keys-'+id)}).then(r=>console.log(JSON.stringify(r))).catch(e=>{console.error(JSON.stringify({status:'FAIL',code:databaseErrorCode(e),evidence:rehearsalErrorEvidence(e)}));process.exitCode=1;});}
 }
