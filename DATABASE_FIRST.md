@@ -2,6 +2,8 @@
 
 Owner-confirmed product decision, 22 October 2026. Students maintain their own schedules. The application uses Auth.js/KMITL Keycloak and Drizzle/PostgreSQL; no Supabase Auth, PDF/OCR or external university timetable provider is used.
 
+Post-merge follow-up: [SELF_HOSTED_POSTGRES.md](SELF_HOSTED_POSTGRES.md) defines the separate administration/migration/runtime roles, private PostgreSQL17 Compose environment and portable backup/recovery. [POST_MERGE_READINESS.md](POST_MERGE_READINESS.md) records current read-only source findings and isolated migration results. Earlier test counts and operational gates below describe the original database-first milestone, not authorization for production execution.
+
 ## Application architecture
 
 - `src/lib/timetable/model.ts`: strict Zod entry/semester/delete inputs, minute precision, date validation, overlap detection, stable course identity and safe errors.

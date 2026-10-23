@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "kind": "self-hosted",
+  "urlFile": "/run/operator/admin-url",
+  "caFile": "/run/operator/ca.crt",
+  "expectedHost": "postgres",
+  "expectedPort": 5432,
+  "expectedDatabase": "koonpinai",
+  "expectedRole": "postgres",
+  "pgBin": "/usr/lib/postgresql/17/bin",
+  "backupRoot": "/backups",
+  "replicaRoot": "/replica",
+  "keyFile": "/run/operator/portable.backup-key.json",
+  "workRoot": "/work",
+  "runtimePasswordFile": "/run/operator/runtime-password",
+  "migrationPasswordFile": "/run/operator/migration-password"
+}

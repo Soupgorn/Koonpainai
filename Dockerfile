@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim@sha256:8cabefbd444809cf0e319b5831c65da1ea202200ca552a5e75fd7938a6f86658 AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 
 FROM dependencies AS builder
 WORKDIR /app
@@ -12,7 +12,11 @@ COPY scripts/package-runtime.mjs ./scripts/package-runtime.mjs
 COPY next.config.ts tsconfig.json postcss.config.mjs ./
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG KOONPINAI_BUILD_ID
-RUN test -n "$KOONPINAI_BUILD_ID" && KOONPINAI_BUILD_ID="$KOONPINAI_BUILD_ID" npm run build && node scripts/package-runtime.mjs /artifact
+ARG KOONPINAI_BUILD_HEAP_MB=384
+# The separate Webpack worker releases compiler memory before type checking.
+# Keep all TypeScript checks; do not trade validation for a smaller build host.
+RUN test -n "$KOONPINAI_BUILD_ID" && NODE_OPTIONS="--max-old-space-size=${KOONPINAI_BUILD_HEAP_MB}" KOONPINAI_BUILD_ID="$KOONPINAI_BUILD_ID" npm run build -- --webpack
+RUN node scripts/package-runtime.mjs /artifact
 
 FROM node:24-bookworm-slim@sha256:8cabefbd444809cf0e319b5831c65da1ea202200ca552a5e75fd7938a6f86658 AS runner
 WORKDIR /app

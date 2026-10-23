@@ -1,0 +1,81 @@
+name: koonpinai
+services:
+  postgres:
+    image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+    user: '999:999'
+    environment:
+      POSTGRES_DB: koonpinai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/postgres-admin/password
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256 --auth-local=scram-sha-256 --data-checksums'
+    command: ['postgres', '-c', 'config_file=/etc/koonpinai/postgresql.conf']
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/koonpinai/postgresql.conf:ro
+      - ./pg_hba.conf:/etc/koonpinai/pg_hba.conf:ro
+      - ${KOONPINAI_POSTGRES_TLS_DIR:?External TLS directory required}:/run/postgres-tls:ro
+      - ${KOONPINAI_POSTGRES_ADMIN_DIR:?External admin-only password directory required}:/run/postgres-admin:ro
+    networks: [database]
+    healthcheck:
+      test: ['CMD-SHELL', 'PGSSLMODE=verify-full PGSSLROOTCERT=/run/postgres-tls/ca.crt pg_isready -h localhost -U postgres -d koonpinai -t 3']
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    restart: unless-stopped
+    stop_grace_period: 60s
+    shm_size: 128m
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    # Deliberately no ports: PostgreSQL is reachable only on the private network.
+  web:
+    image: ${KOONPINAI_WEB_IMAGE:?Reviewed immutable web image required}
+    init: true
+    user: '1001:1001'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    pids_limit: 128
+    mem_limit: 1024m
+    cpus: 1.0
+    stop_grace_period: 40s
+    ports: ['127.0.0.1:${KOONPINAI_WEB_PORT:-3000}:3000']
+    volumes:
+      - ${KOONPINAI_WEB_SECRET_DIR:?Exactly five runtime-only files required}:/run/secrets:ro
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /app/.next/cache:size=64m,uid=1001,gid=1001,mode=0700
+    networks: [database,egress]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'on-failure:3'
+  tools:
+    profiles: [operations]
+    image: ${KOONPINAI_TOOLS_IMAGE:?Reviewed immutable tools image required}
+    user: '1002:1002'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 64
+    networks: [database]
+    volumes:
+      - ${KOONPINAI_OPERATOR_SECRET_DIR:?Separate operator-only directory required}:/run/operator:ro
+      - ${KOONPINAI_BACKUP_DIR:?External encrypted backup directory required}:/backups
+      - ${KOONPINAI_BACKUP_REPLICA_DIR:?Off-VM mounted encrypted replica directory required}:/replica
+    tmpfs:
+      - /tmp:size=32m,uid=1002,gid=1002,mode=0700
+      - /work:size=128m,uid=1002,gid=1002,mode=0700
+    # Never runs automatically and never applies migrations during web startup.
+    command: ['audit', '--config=/run/operator/config.json']
+volumes:
+  pgdata:
+networks:
+  database:
+    internal: true
+  egress:

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "artifactSha256": "REPLACE_WITH_REVIEWED_RUNTIME_ARTIFACT_MANIFEST_SHA256",
+  "authUrl": "https://YOUR-APP-DOMAIN/",
+  "clientId": "YOUR_APPROVED_KMITL_CLIENT_ID",
+  "database": { "file": "/run/secrets/database", "format": "text" },
+  "databaseEndpoint": { "kind": "self-hosted", "host": "postgres", "port": 5432, "database": "koonpinai" },
+  "authSecret": { "file": "/run/secrets/auth", "format": "text" },
+  "clientSecret": { "file": "/run/secrets/oidc", "format": "text" },
+  "caFile": "/run/secrets/ca.crt",
+  "port": 3000,
+  "healthPort": 3001,
+  "host": "0.0.0.0",
+  "shutdownMs": 30000
+}

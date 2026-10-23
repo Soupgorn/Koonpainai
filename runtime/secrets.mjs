@@ -22,7 +22,7 @@ export function assertRuntimeSecretDirectory(manifestFile){
   }
 }
 export function validateManifest(m) {
-  const keys = ['version','artifactSha256','authUrl','clientId','database','databaseTarget','authSecret','clientSecret','caFile','port','healthPort','host','shutdownMs'];
+  const keys = ['version','artifactSha256','authUrl','clientId','database','databaseTarget','databaseEndpoint','authSecret','clientSecret','caFile','port','healthPort','host','shutdownMs'];
   if (!m || m.version !== 1 || Object.keys(m).some(k => !keys.includes(k))) deny('MANIFEST_INVALID');
   if(!/^[a-f0-9]{64}$/.test(m.artifactSha256??''))deny('ARTIFACT_PIN_REQUIRED');
   let origin; try { origin = new URL(m.authUrl); } catch { deny('MANIFEST_INVALID'); }
@@ -39,14 +39,21 @@ export function validateManifest(m) {
   if(m.database.format==='dpapi-runtime-v1'){
     const t=m.databaseTarget;if(!t||Object.keys(t).sort().join(',')!=='database,host,user'||!Object.values(t).every(v=>typeof v==='string'&&v.length>0)||!t.host.endsWith('.pooler.supabase.com')||!/^koonpinai_runtime\.[a-z0-9]+$/.test(t.user)||!/^[A-Za-z0-9_]+$/.test(t.database))deny('DATABASE_TARGET_REQUIRED');
   }else if(m.databaseTarget!==undefined)deny('UNEXPECTED_DATABASE_TARGET');
+  if(m.databaseEndpoint!==undefined){
+    const t=m.databaseEndpoint;
+    if(!t||Object.keys(t).sort().join(',')!=='database,host,kind,port'||t.kind!=='self-hosted'||typeof t.host!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/.test(t.host)||/(^|\.)supabase\.(com|co)$/i.test(t.host)||!Number.isInteger(t.port)||t.port<1||t.port>65535||typeof t.database!=='string'||!/^[a-zA-Z0-9_]+$/.test(t.database)||m.database.format==='dpapi-runtime-v1')deny('SELF_HOSTED_ENDPOINT_INVALID');
+  }
   return m;
 }
-export function validateRuntimeUrl(value, {isolated=false}={}) {
+/** @param {string} value
+ * @param {{isolated?:boolean,endpoint?:{kind:string,host:string,port:number,database:string}}} [options] */
+export function validateRuntimeUrl(value, {isolated=false,endpoint=undefined}={}) {
   let u; try { u=new URL(value); } catch { deny('RUNTIME_DATABASE_INVALID'); }
   const hosted=u.hostname.endsWith('.pooler.supabase.com') && (u.port||'5432')==='5432' && /^koonpinai_runtime\.[a-z0-9]+$/.test(decodeURIComponent(u.username));
   // Tests use a NEW local synthetic cluster, never a tunnel or hosted fallback.
   const fixture=isolated && u.hostname==='127.0.0.1' && Number(u.port)>=55434 && Number(u.port)<=55534 && u.pathname==='/phase3_synthetic' && u.username==='koonpinai_runtime';
-  if (!['postgres:','postgresql:'].includes(u.protocol) || (!hosted&&!fixture) || !u.password || u.pathname.length<2 || u.hash || [...u.searchParams].some(([k,v])=>k!=='sslmode'||v!=='verify-full')) deny('DEDICATED_SESSION_DATABASE_REQUIRED');
+  const selfHosted=endpoint?.kind==='self-hosted'&&u.hostname===endpoint.host&&(Number(u.port||5432)===endpoint.port)&&decodeURIComponent(u.pathname.slice(1))===endpoint.database&&u.username==='koonpinai_runtime';
+  if (!['postgres:','postgresql:'].includes(u.protocol) || (endpoint ? !selfHosted : !hosted&&!fixture) || !u.password || u.pathname.length<2 || u.hash || [...u.searchParams].some(([k,v])=>k!=='sslmode'||v!=='verify-full')) deny('DEDICATED_SESSION_DATABASE_REQUIRED');
   return u;
 }
 function privateFile(file, bundleRoot) {
@@ -91,7 +98,7 @@ export function loadRuntimeEnvironment(manifestFile, root, {isolated=false}={}) 
     const p=JSON.parse(database);if(p.version!==1||p.role!=='koonpinai_runtime'||!/^[A-Za-z0-9_-]{64}$/.test(p.password))deny('STAGED_CREDENTIAL_INVALID');
     const t=m.databaseTarget,u=new URL('postgresql://placeholder@'+t.host+':5432/'+t.database);u.username=t.user;u.password=p.password;database=u.href;
   }
-  validateRuntimeUrl(database,{isolated});
+  validateRuntimeUrl(database,{isolated,endpoint:m.databaseEndpoint});
   const secret=readSecret(m.authSecret,root),clientSecret=readSecret(m.clientSecret,root);
   if(secret.length<32) deny('AUTH_SECRET_INVALID');
   /** @type {NodeJS.ProcessEnv} */

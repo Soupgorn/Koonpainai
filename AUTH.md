@@ -21,6 +21,8 @@ Copy `.env.example` to the ignored `.env.local` and configure:
 
 Never use `NEXT_PUBLIC_` for credentials. Never paste credentials, callback query strings, tokens or database URLs into issues or logs. `.env*`, private PDFs and `.private/` are ignored. Keep production secret management outside source control.
 
+For the proposed Linux/self-hosted path, use the exact external runtime-only manifest and separate operator credentials described in [SELF_HOSTED_POSTGRES.md](SELF_HOSTED_POSTGRES.md). The runtime role remains `koonpinai_runtime`; Auth.js/Keycloak identities, current policy acknowledgement, account approvals and encrypted/revocable sessions are unchanged. No Supabase Auth or database-backed OIDC token store is introduced. Windows DPAPI files are not Linux secret delivery.
+
 ```powershell
 npm ci
 npm run auth:check
