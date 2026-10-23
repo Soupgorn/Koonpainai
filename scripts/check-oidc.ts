@@ -5,6 +5,7 @@ import { readAuthSettings } from "../src/lib/auth/settings";
 import { databaseConfig, databaseErrorCode } from "../src/db/connection";
 loadEnvConfig(process.cwd());
 async function main() {
+  let stage = "discovery";
   try {
     const metadata = await kmitlTransport().discovery();
     console.log(
@@ -24,6 +25,7 @@ async function main() {
         "Register exactly this callback with the approved client:",
         settings.origin + "/api/auth/callback/keycloak",
       );
+      stage = "database";
       const pool = new Pool(databaseConfig());
       try {
         await pool.query("select 1");
@@ -42,11 +44,18 @@ async function main() {
       "This checks metadata/configuration only. It does not verify client approval, redirect registration or a real user login.",
     );
   } catch (error) {
+    const code = databaseErrorCode(error);
     console.error(
-      "OIDC/database preflight failed (" +
-        databaseErrorCode(error) +
+      "OIDC/database preflight failed at " + stage + " (" +
+        code +
         "). Details redacted.",
     );
+    if (stage === "database" && [
+      "SELF_SIGNED_CERT_IN_CHAIN", "DEPTH_ZERO_SELF_SIGNED_CERT",
+      "UNABLE_TO_VERIFY_LEAF_SIGNATURE", "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+    ].includes(code)) {
+      console.error("Configure DATABASE_CA_FILE with the trusted provider CA (Supabase Dashboard > Database Settings > SSL Configuration). Keep certificate and hostname verification enabled.");
+    }
     process.exitCode = 1;
   }
 }

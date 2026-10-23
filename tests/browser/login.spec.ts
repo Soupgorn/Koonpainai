@@ -73,3 +73,16 @@ test("login-only chrome removal leaves other routes with their existing shell", 
   await expect(page.locator("footer")).toHaveCount(0);
   await expect(page.locator(".friend-card")).toHaveCount(12);
 });
+
+test("known sign-in errors have safe retry messages and unknown details stay hidden", async ({ page }) => {
+  for (const [code, message] of [
+    ["Configuration", "Unable to sign in right now. Please try again later."],
+    ["SignInFailed", "Unable to sign in right now. Please try again later."],
+    ["AccessDenied", "Sign-in was not allowed. Please try again or contact support."],
+    ["private-provider-detail", "Sign-in could not be completed. Please try again."],
+  ]) {
+    await page.goto("/login?" + new URLSearchParams({ error: code }));
+    await expect(page.getByRole("main").getByRole("alert")).toHaveText(message);
+    await expect(page.locator("body")).not.toContainText("private-provider-detail");
+  }
+});
