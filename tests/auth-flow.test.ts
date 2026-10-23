@@ -103,6 +103,8 @@ for (const fault of [
   "nonce",
   "expiry",
   "database",
+  "token_exchange",
+  "missing_subject",
 ] as const)
   test(`mocked OIDC ${fault} failure never issues an application session`, async () => {
     const f = await oidcFixture(fault);
@@ -132,6 +134,35 @@ test("tampered state and CSRF-less sign-in are rejected", async () => {
   const r = await f.callback("tampered");
   assert.notEqual(r.headers.get("location"), f.settings.origin + "/");
   assert.equal(f.repository.users.length, 0);
+});
+test("missing PKCE verifier and provider-denied authorization never create a session", async () => {
+  for (const fault of ["missing_pkce", "denied"] as const) {
+    const f = await oidcFixture();
+    const authorization = await f.begin();
+    let response: Response;
+    if (fault === "missing_pkce") {
+      for (const key of f.jar.keys())
+        if (key.endsWith(".pkce.code_verifier")) f.jar.delete(key);
+      response = await f.callback();
+      assert.equal(f.pkceChecked(), false);
+    } else {
+      response = await f.request("/callback/keycloak?" + new URLSearchParams({
+        error: "access_denied",
+        state: authorization.searchParams.get("state")!,
+      }));
+    }
+    assert.notEqual(response.headers.get("location"), f.settings.origin + "/");
+    assert.equal(f.repository.users.length, 0);
+    assert.equal(f.repository.sessions.size, 0);
+    assert.equal([...f.jar.keys()].some((key) => key.endsWith(".session-token")), false);
+  }
+});
+test("an expired database session cannot be restored by its encrypted cookie", async () => {
+  const f = await oidcFixture();
+  await f.begin();
+  await f.callback();
+  for (const session of f.repository.sessions.values()) session.expiresAt = new Date(0);
+  assert.equal(await (await f.request("/session")).json(), null);
 });
 test("local logout revokes the encrypted app session without contacting Keycloak logout", async () => {
   const f = await oidcFixture();

@@ -14,6 +14,11 @@ export default async function Page({
 }) {
   const query = await searchParams;
   const configured = !!readAuthSettings();
+  const errorMessage = query.error === "AccessDenied"
+    ? "Sign-in was not allowed. Please try again or contact support."
+    : query.error === "Configuration" || query.error === "SignInFailed"
+      ? "Unable to sign in right now. Please try again later."
+      : "Sign-in could not be completed. Please try again.";
   return (
     <main id="main" className="auth-page">
       <section className="auth-card" aria-labelledby="login-heading" lang="th">
@@ -28,7 +33,7 @@ export default async function Page({
         </form>
         {query.error ? (
           <p className="auth-feedback" role="alert" lang="en">
-            Sign-in could not be completed. Please try again.
+            {errorMessage}
           </p>
         ) : !configured ? (
           <p className="auth-feedback" role="status">

@@ -70,7 +70,7 @@ export class MemoryMembers implements MemberRepository {
   }
 }
 export async function oidcFixture(
-  fault?: "issuer" | "audience" | "signature" | "nonce" | "expiry" | "database",
+  fault?: "issuer" | "audience" | "signature" | "nonce" | "expiry" | "database" | "token_exchange" | "missing_subject",
   extraClaims: Record<string, unknown> = {},
 ) {
   const { publicKey, privateKey } = await generateKeyPair("RS256");
@@ -108,6 +108,9 @@ export async function oidcFixture(
     if (url === EXPECTED_ENDPOINTS.jwks_uri)
       return Response.json({ keys: [publicJwk] });
     if (url === EXPECTED_ENDPOINTS.token_endpoint) {
+      const headers = new Headers(init?.headers);
+      if (headers.get("authorization") !== "Basic " + Buffer.from(settings.clientId + ":" + settings.clientSecret).toString("base64"))
+        throw new Error("Client authentication mismatch");
       const body =
         init?.body instanceof URLSearchParams
           ? init.body
@@ -124,6 +127,8 @@ export async function oidcFixture(
       )
         throw new Error("Callback mismatch");
       pkceChecked = true;
+      if (fault === "token_exchange")
+        return Response.json({ error: "invalid_grant", error_description: "private-provider-detail" }, { status: 400 });
       let idToken = await new SignJWT({
         ...extraClaims,
         name: "Fictional Student",
@@ -135,7 +140,7 @@ export async function oidcFixture(
             : authorization!.searchParams.get("nonce"),
       })
         .setProtectedHeader({ alg: "RS256", kid: "fixture-key" })
-        .setSubject("fictional-oidc-subject")
+        .setSubject(fault === "missing_subject" ? "" : "fictional-oidc-subject")
         .setIssuer(
           fault === "issuer" ? "https://untrusted.example" : KMITL_ISSUER,
         )
@@ -163,7 +168,8 @@ export async function oidcFixture(
     throw new Error("Unexpected OIDC fixture request");
   };
   const config = createAuthConfig(settings, repository, upstream);
-  config.logger = { error() {}, warn() {}, debug() {} };
+  const failures: Error[] = [];
+  config.logger = { error(error) { failures.push(error); }, warn() {}, debug() {} };
   const jar = new Map<string, string>();
   async function request(path: string, method = "GET", body?: URLSearchParams) {
     const response = await Auth(
@@ -215,6 +221,7 @@ export async function oidcFixture(
     request,
     begin,
     callback,
+    failures,
     pkceChecked: () => pkceChecked,
   };
 }
