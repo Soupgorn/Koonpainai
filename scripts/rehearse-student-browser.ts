@@ -13,6 +13,7 @@ import type { Pool } from "pg";
 import { POLICY_VERSION } from "../src/lib/auth/domain";
 import { assertLocalCanaryTarget, ISOLATED_MARKER } from "./phase3-canary";
 import { osEnvironment } from "../runtime/secrets.mjs";
+import { observeRuntimeSessions, readRuntimeSessions } from "./runtime-session-observer";
 
 export async function rehearseStudentBrowser(o: { owner: Pool; root: string; artifact: string; secretRoot: string; url: string; caFile: string; selfHosted?: boolean }) {
   assertLocalCanaryTarget(o.owner.options.host, o.owner.options.port, o.owner.options.database);
@@ -31,13 +32,16 @@ export async function rehearseStudentBrowser(o: { owner: Pool; root: string; art
     await o.owner.query("INSERT INTO public.members(id,oidc_issuer,oidc_subject,display_name,nickname,department,profile_completed_at,policy_version,policy_accepted_at,status) VALUES($1,'https://sso.kmitl.ac.th/realms/kmitl',$2,'Synthetic browser',$3,'Synthetic',now(),$4,now(),$5)", [ids[i], subjects[i], ["Browser A", "Browser B", "Pending fixture"][i], POLICY_VERSION, i === 2 ? "pending" : "approved"]);
     await o.owner.query("INSERT INTO public.application_sessions(id,member_id,expires_at) VALUES($1,$2,now()+interval '1 hour')", [sids[i], ids[i]]);
   }
+  const browserSessions = await observeRuntimeSessions(() => readRuntimeSessions(o.owner));
   const child = spawn(process.execPath, o.selfHosted ? [join(o.artifact,"runtime/launch.mjs"),mf] : [helper], { cwd: o.artifact, env: { ...osEnvironment(), NODE_ENV: "production" }, windowsHide: true, stdio: ["ignore", "pipe", "pipe", "ipc"] });
   let logs = ""; for (const stream of [child.stdout, child.stderr]) stream?.on("data", b => { logs += b.toString(); });
   const exit = new Promise<number | null>(ok => child.once("exit", ok));
   let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
   const checks: string[] = [];
+  let shutdownSessions: Awaited<ReturnType<typeof browserSessions.waitForClosed>> | undefined;
   try {
     await new Promise<void>((ok, fail) => { const t = setTimeout(() => fail(Error("ISOLATED_START_TIMEOUT")), 45000); child.on("message", m => { if ((m as { event?: string }).event === "ready") { clearTimeout(t); ok(); } }); child.once("exit", () => { clearTimeout(t); fail(Error("ISOLATED_START_FAILED")); }); });
+    await browserSessions.capture();
     browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     // Controlled reverse proxy for this fixture only. Preserve actual origin,
@@ -91,11 +95,12 @@ export async function rehearseStudentBrowser(o: { owner: Pool; root: string; art
     if (child.exitCode === null && child.connected) child.send({ type: "shutdown" });
     let t: ReturnType<typeof setTimeout> | undefined; try { assert.equal(await Promise.race([exit, new Promise((_, fail) => { t = setTimeout(() => fail(Error("ISOLATED_DRAIN_TIMEOUT")), 35000); })]), 0); } finally { clearTimeout(t); }
     assert.ok(!logs.includes(o.url) && !logs.includes(secret), "ISOLATED_SECRET_LOGGING");
-    assert.equal((await o.owner.query("SELECT count(*)::int n FROM pg_stat_activity WHERE usename='koonpinai_runtime' AND datname=current_database()")).rows[0].n, 0);
+    assert.ok(logs.includes('[runtime] drained'), 'RUNTIME_DRAIN_NOT_CONFIRMED');
+    shutdownSessions = await browserSessions.waitForClosed();
     assert.equal((await o.owner.query("SELECT count(*)::int n FROM public.members WHERE id=ANY($1::uuid[]) AND oidc_subject=ANY($2::text[])", [ids, subjects])).rows[0].n, ids.length);
     await o.owner.query("DELETE FROM public.application_sessions WHERE id=ANY($1::uuid[]) AND member_id=ANY($2::uuid[])", [sids, ids]);
     await o.owner.query("DELETE FROM public.members WHERE id=ANY($1::uuid[]) AND oidc_subject=ANY($2::text[])", [ids, subjects]);
     assert.equal((await o.owner.query("SELECT md5(coalesce(jsonb_agg(to_jsonb(m) order by id)::text,'[]')) digest FROM public.members m")).rows[0].digest, before);
   }
-  return { status: "PASS", checks, count: checks.length, realNext: true, realServerActions: true, realRestrictedPostgres: true, realOidc: false, syntheticSession: true, productionConnected: false, productionLauncher: o.selfHosted??false, fixturesCleaned: true, runtimeDrained: true };
+  return { status: "PASS", checks, count: checks.length, realNext: true, realServerActions: true, realRestrictedPostgres: true, realOidc: false, syntheticSession: true, productionConnected: false, productionLauncher: o.selfHosted??false, fixturesCleaned: true, runtimeDrained: true, shutdownSessions };
 }

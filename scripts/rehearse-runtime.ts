@@ -10,6 +10,7 @@ import {pathToFileURL} from 'node:url';
 import {encode} from 'next-auth/jwt';
 import {assertLocalCanaryTarget,ISOLATED_MARKER} from './phase3-canary';
 import {loadRuntimeEnvironment,validateRuntimeUrl,osEnvironment} from '../runtime/secrets.mjs';
+import {observeRuntimeSessions,readRuntimeSessions,rehearseSessionOwnership} from './runtime-session-observer';
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 type Options={owner:Pool;config:PoolConfig;url:string;caFile:string;root:string;secretRoot:string;artifact:string;rollbackArtifact:string;selfHosted?:boolean};
 export async function rehearseRuntime(o:Options){
@@ -34,6 +35,7 @@ export async function rehearseRuntime(o:Options){
     try{await assert.rejects(denied.connect());assert.equal(denied.totalCount,0);}finally{await denied.end();}
     checks.push('Failed awaited connection initializer destroys the client and never leases it');
   }finally{if(!pool.ended)await pool.end();}
+  const sessionOwnership=await rehearseSessionOwnership(o.owner,o.config);
   const authSecret='public-fictional-runtime-rehearsal-auth-secret-unchanged';
   for(const [name,value] of [['database',o.url],['auth',authSecret],['oidc','public-fictional-oidc-client-secret']])writeFileSync(join(o.secretRoot,name+'.secret'),value,{flag:'wx',mode:0o600});
   const artifactSha=(artifact:string)=>createHash('sha256').update(readFileSync(join(artifact,'runtime-artifact.json'))).digest('hex');
@@ -82,9 +84,10 @@ export async function rehearseRuntime(o:Options){
     const ready=new Promise<void>((ok,fail)=>{const timer=setTimeout(()=>fail(Error('ISOLATED_STARTUP_TIMEOUT')),45000);child.on('message',(m:unknown)=>{if((m as {event?:string}).event==='ready'){clearTimeout(timer);ok();}});child.once('exit',()=>{clearTimeout(timer);const code=logs.match(/Startup rejected \(([A-Z0-9_]+)\)/)?.[1]??'UNKNOWN';fail(Error('ISOLATED_STARTUP_'+code));});});
     if(expectReady)await ready;else{void ready.catch(()=>{});assert.equal(await exited,1);}
     const verifyLogs=()=>{for(const secret of [o.url,authSecret,String(o.config.password),'public-fictional-oidc-client-secret'])assert.ok(!logs.includes(secret),'SECRET_LOGGING_DETECTED');};
-    verifyLogs();return{child,exited,verifyLogs,rejectionCode:logs.match(/Startup rejected \(([A-Z0-9_]+)\)/)?.[1]};
+    const verifyDrain=()=>{verifyLogs();assert.ok(logs.includes('[runtime] drained'),'RUNTIME_DRAIN_NOT_CONFIRMED');};
+    verifyLogs();return{child,exited,verifyLogs,verifyDrain,rejectionCode:logs.match(/Startup rejected \(([A-Z0-9_]+)\)/)?.[1]};
   }
-  async function stop(p:Awaited<ReturnType<typeof start>>){if(p.child.exitCode!==null)return; if(process.platform==='win32')p.child.send({type:'shutdown'});else p.child.kill('SIGTERM');let timer:ReturnType<typeof setTimeout>|undefined;try{const code=await Promise.race([p.exited,new Promise((_,fail)=>{timer=setTimeout(()=>fail(Error('DRAIN_TIMEOUT')),35000);})]);assert.equal(code,0);p.verifyLogs();}finally{clearTimeout(timer);}}
+  async function stop(p:Awaited<ReturnType<typeof start>>){if(p.child.exitCode!==null)return; if(process.platform==='win32')p.child.send({type:'shutdown'});else p.child.kill('SIGTERM');let timer:ReturnType<typeof setTimeout>|undefined;try{const code=await Promise.race([p.exited,new Promise((_,fail)=>{timer=setTimeout(()=>fail(Error('DRAIN_TIMEOUT')),35000);})]);assert.equal(code,0);p.verifyDrain();}finally{clearTimeout(timer);}}
   function http(port:number,path:string,authenticated=false):Promise<{status:number;location?:string;body:string}>{return new Promise((ok,fail)=>{const req=request({hostname:'127.0.0.1',port,path,headers:{host:'app.example','x-forwarded-proto':'https',...(authenticated?{cookie:'__Secure-authjs.session-token='+cookie}:{})}},res=>{const chunks:Buffer[]=[];res.on('data',b=>chunks.push(b));res.on('end',()=>ok({status:res.statusCode!,location:res.headers.location,body:Buffer.concat(chunks).toString()}));});req.setTimeout(20000,()=>req.destroy(Error('ISOLATED_HTTP_TIMEOUT')));req.on('error',fail);req.end();});}
   function assertPolicyGate(r:Awaited<ReturnType<typeof http>>){
     const redirect=r.status===307&&r.location?.endsWith('/onboarding/policy');
@@ -94,7 +97,9 @@ export async function rehearseRuntime(o:Options){
   try{
     await o.owner.query("INSERT INTO public.members(id,oidc_issuer,oidc_subject,display_name,nickname,department,profile_completed_at,policy_version,policy_accepted_at,status) VALUES($1,'https://sso.kmitl.ac.th/realms/kmitl',$2,'Synthetic lifecycle','Fixture','Synthetic',now(),'2026-10-21',now(),'approved')",[memberId,subject]);fixtureCreated=true;
     await o.owner.query("INSERT INTO public.application_sessions(id,member_id,expires_at) VALUES($1,$2,now()+interval '1 hour')",[sid,memberId]);
+    const candidateSessions=await observeRuntimeSessions(()=>readRuntimeSessions(o.owner));
     const candidate=await start(o.artifact,env);
+    await candidateSessions.capture();
     assert.equal((await http(3331,'/ready')).status,200);assert.equal((await http(3330,'/login')).status,200);
     assert.equal((await http(3330,'/')).status,307);
     const gated=await http(3330,'/',true);assertPolicyGate(gated);
@@ -114,16 +119,20 @@ export async function rehearseRuntime(o:Options){
     try{
       await held.query('BEGIN');await held.query('LOCK TABLE public.application_sessions IN ACCESS EXCLUSIVE MODE');
       const response=http(3330,'/account',true);
-      let blocked=false;for(let i=0;i<35;i++){blocked=Number((await o.owner.query("SELECT count(*) AS n FROM pg_stat_activity WHERE usename='koonpinai_runtime' AND wait_event_type='Lock'")).rows[0].n)>0;if(blocked)break;await sleep(30);}assert.ok(blocked);
+      await candidateSessions.waitForLock();await candidateSessions.capture();
       if(process.platform==='win32')candidate.child.send({type:'shutdown'});else candidate.child.kill('SIGTERM');
       await sleep(100);assert.equal(candidate.child.exitCode,null);await held.query('COMMIT');
-      assert.ok([200,307].includes((await response).status));assert.equal(await candidate.exited,0);candidate.verifyLogs();
+      assert.ok([200,307].includes((await response).status));assert.equal(await candidate.exited,0);candidate.verifyDrain();
     }finally{await held.query('ROLLBACK');held.release();}
-    assert.equal(Number((await o.owner.query("SELECT count(*) AS n FROM pg_stat_activity WHERE usename='koonpinai_runtime'")).rows[0].n),0);
+    const shutdownSessions=await candidateSessions.waitForClosed();
+    assert.ok(shutdownSessions.fixtureCount>0,'LIVE_FIXTURE_SESSION_NOT_OBSERVED');
     checks.push('Real in-flight authenticated SQL request completes before shutdown; all runtime database clients close');
-    const rollback=await start(o.rollbackArtifact,environment(o.rollbackArtifact,3330,3331));
+    const rollbackSessions=await observeRuntimeSessions(()=>readRuntimeSessions(o.owner));
+    const rollback=await start(o.rollbackArtifact,environment(o.rollbackArtifact,3330,3331));await rollbackSessions.capture();
     const oldSession=await http(3330,'/',true);assertPolicyGate(oldSession);
-    assert.equal((await http(3331,'/ready')).status,200);await stop(rollback);
+    assert.equal((await http(3331,'/ready')).status,200);await stop(rollback);await rollbackSessions.waitForClosed();
+    checks.push('Backend ownership regression rejects an intentional relabeled leak; candidate and rollback sessions reach zero within the observation deadline');
+    console.log(JSON.stringify({stage:'runtime-session-drain',sessionOwnership,shutdownSessions}));
     checks.push((artifactSha(o.artifact)!==artifactSha(o.rollbackArtifact)?'Previous same-policy build rollback':'Same-artifact restart')+' preserves encrypted session and renewed-consent gate');
   }finally{
     for(const child of children){if(child.exitCode===null&&child.connected)child.send({type:'shutdown'});}

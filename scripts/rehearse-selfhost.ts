@@ -23,6 +23,7 @@ import {backup,restore,verifyBackup,replicateBackup,projection,pgTool,type Datab
 import {configureAccess,verifyAccess} from './portable/access';
 import {exerciseSyntheticAccounts,cleanupSyntheticAccounts,requireSyntheticDatabase,stagingFixtureSchema} from './staging/probe';
 import {outputEvidence,rehearsalErrorEvidence} from './tooling/rehearsal-diagnostics.mjs';
+import {FIXTURE_APPLICATION} from './runtime-session-observer';
 
 const env={...osEnvironment(),NODE_ENV:'test' as const};
 async function tool(exe:string,args:string[],input?:Buffer|string){return new Promise<string>((ok,fail)=>{const c=spawn(exe,args,{env,windowsHide:true,stdio:['pipe','pipe','pipe']});let out='',stderr='';const evidence=(exitCode:number|null)=>({program:basename(exe).replace(/\.exe$/i,''),exitCode,...outputEvidence(out,stderr)});const t=setTimeout(()=>{c.kill();fail(Object.assign(Error('ISOLATED_TOOL_TIMEOUT'),{evidence:evidence(null)}));},120000);c.stdout.on('data',b=>{out=(out+b.toString()).slice(-2e6);});c.stderr.on('data',b=>{stderr=(stderr+b.toString()).slice(-16000);});c.stdin.on('error',()=>{});c.stdin.end(input);c.on('error',()=>{clearTimeout(t);fail(Object.assign(Error('ISOLATED_TOOL_UNAVAILABLE'),{evidence:evidence(null)}));});c.on('close',code=>{clearTimeout(t);if(code===0)ok(out);else fail(Object.assign(Error('ISOLATED_TOOL_FAILED'),{evidence:evidence(code)}));});});}
@@ -44,7 +45,8 @@ export async function rehearseSelfhost(o:{bin:string;artifact:string;rollbackArt
  // operational migration/backup clients retain their production max-one cap.
  // Canonical fixture digests must not vary with which control connection a
  // pool leases after projection() has normalized one session's timezone.
- const pool=(t:DatabaseTarget,runtime=false)=>{const p=new Pool({...databaseConfig(runtime?'runtime':'migration',{NODE_ENV:'test',DATABASE_URL:t.url,MIGRATION_DATABASE_URL:t.url,DATABASE_CA_FILE:t.caFile,MIGRATION_DATABASE_CA_FILE:t.caFile}),max:2,options:'-c timezone=UTC'});p.on('error',()=>{});pools.push(p);return p;};
+ // Keep fixture sessions alive until explicit cleanup, so slow runners cannot hide ownership mistakes via idle expiry.
+ const pool=(t:DatabaseTarget,runtime=false)=>{const p=new Pool({...databaseConfig(runtime?'runtime':'migration',{NODE_ENV:'test',DATABASE_URL:t.url,MIGRATION_DATABASE_URL:t.url,DATABASE_CA_FILE:t.caFile,MIGRATION_DATABASE_CA_FILE:t.caFile}),...(runtime?{application_name:FIXTURE_APPLICATION,idleTimeoutMillis:0,maxLifetimeSeconds:0}:{}),max:2,options:'-c timezone=UTC'});p.on('error',()=>{});pools.push(p);return p;};
  const ctl=(root:string,action:'start'|'stop')=>{execFileSync(executable('pg_ctl'),['-D',join(root,'data'),...(action==='start'?['-l',join(root,'server.log')]:['-m','fast']),'-w',action],{env,windowsHide:true,stdio:'ignore',timeout:30000});};
  async function cluster(name:string,port:number){
   const probe=new Pool({host:'127.0.0.1',port,user:'isolated-port-probe',database:'postgres',connectionTimeoutMillis:500});try{await probe.connect();throw Error('ISOLATED_PORT_OCCUPIED');}catch(e){assert.equal((e as {code:string}).code,'ECONNREFUSED');}finally{await probe.end();}
